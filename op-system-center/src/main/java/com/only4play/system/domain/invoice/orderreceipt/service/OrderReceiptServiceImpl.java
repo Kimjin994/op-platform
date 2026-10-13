@@ -11,7 +11,9 @@ import com.only4play.system.domain.invoice.invoice.repository.InvoiceRepository;
 import com.only4play.system.domain.invoice.orderreceipt.OrderReceipt;
 import com.only4play.system.domain.invoice.orderreceipt.ReceiptStatus;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.IOrderReceiptDomainService;
+import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.exchange.ExchangeConditionModel;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.exchange.ExchangeInvoiceModel;
+import com.only4play.system.domain.invoice.orderreceipt.response.ExchangeByConditionResponse;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.exchange.ExchangeInvoiceResultModel;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.register.OrderRegisterModel;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.register.OrderRegisterResultModel;
@@ -99,6 +101,19 @@ public class OrderReceiptServiceImpl implements IOrderReceiptService {
           .execute();
     });
     return batchNo;
+  }
+
+  @Override
+  public ExchangeByConditionResponse exchangeByCondition(ExchangeConditionModel conditionModel) {
+    ExchangeInvoiceModel model = orderReceiptDomainService.prepareExchange(conditionModel);
+    ExchangeByConditionResponse response = new ExchangeByConditionResponse();
+    response.setPreview(conditionModel.isPreview());
+    if (conditionModel.isPreview()) {
+      response.setResult(orderReceiptDomainService.exchangeInvoice(model));
+      return response;
+    }
+    response.setBatchNo(exchangeInvoice(model));
+    return response;
   }
 
   @Override

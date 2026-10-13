@@ -24,5 +24,7 @@ public class OrderRegisterRequest implements Request {
 
   private Integer accountType;
 
+  private String phone;
+
   private List<OrderRegisterItem> orderItems;
 }

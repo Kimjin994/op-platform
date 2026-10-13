@@ -48,6 +48,9 @@ public class OrderRegisterModel {
   )
   private Integer accountType;
 
+  @FieldDesc(name = "手机号")
+  private String phone;
+
   @FieldDesc(name = "订单项")
   private List<OrderRegisterItem> orderItems;
 

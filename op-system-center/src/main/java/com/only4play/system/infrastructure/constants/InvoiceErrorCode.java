@@ -16,7 +16,8 @@ public enum InvoiceErrorCode implements BaseEnum<InvoiceErrorCode> {
   BANK_ACCOUNT_ILLEGAL(1201008,"账号非法"),
   TAX_NO_ILLEGAL(1201009,"纳税人识别号非法"),
   SPLIT_RESULT_EMPTY(1201010,"拆票结果为空"),
-  RECEIPT_NOT_ALLOW_ABANDON(1201011,"凭据状态不允许作废")
+  RECEIPT_NOT_ALLOW_ABANDON(1201011,"凭据状态不允许作废"),
+  RECEIPT_NOT_FOUND(1201012,"没有可开票的凭据")
   ;
 
   InvoiceErrorCode(Integer code, String name) {

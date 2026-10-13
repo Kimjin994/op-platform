@@ -2,7 +2,9 @@
 package com.only4play.system.domain.invoice.orderreceipt.service;
 
 import com.only4play.common.model.PageRequestWrapper;
+import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.exchange.ExchangeConditionModel;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.exchange.ExchangeInvoiceModel;
+import com.only4play.system.domain.invoice.orderreceipt.response.ExchangeByConditionResponse;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.register.OrderRegisterModel;
 import com.only4play.system.domain.invoice.orderreceipt.query.OrderReceiptQuery;
 import com.only4play.system.domain.invoice.orderreceipt.response.OrderRegisterResponse;
@@ -23,6 +25,11 @@ public interface IOrderReceiptService {
    * 凭据换发票，返回批次号
    */
   String exchangeInvoice(ExchangeInvoiceModel exchangeInvoiceModel);
+
+  /**
+   * 按交易类型和手机号开票。预览只返回票面。
+   */
+  ExchangeByConditionResponse exchangeByCondition(ExchangeConditionModel conditionModel);
 
   /**
    * 作废未开票凭据

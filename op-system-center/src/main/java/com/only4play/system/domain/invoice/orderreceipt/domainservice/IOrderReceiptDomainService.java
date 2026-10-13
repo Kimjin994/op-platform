@@ -34,6 +34,11 @@ public interface IOrderReceiptDomainService {
   ExchangeInvoiceResultModel exchangeInvoiceByCondition(ExchangeConditionModel conditionModel);
 
   /**
+   * 按交易类型和手机号找出未开票凭据，组装开票请求
+   */
+  ExchangeInvoiceModel prepareExchange(ExchangeConditionModel conditionModel);
+
+  /**
    * 按发票确认开票结果。成功的凭据改为已完成，失败的凭据退回未开票。
    */
   void confirmInvoices(List<InvoiceResultModel> results);

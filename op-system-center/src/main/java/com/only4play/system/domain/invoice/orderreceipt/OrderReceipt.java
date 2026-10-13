@@ -57,6 +57,9 @@ public class OrderReceipt extends BaseJpaAggregate {
   @FieldDesc(name = "订单流水号")
   private String orderFlowNo;
 
+  @FieldDesc(name = "手机号")
+  private String phone;
+
   @Column(columnDefinition = "text")
   @FieldDesc(name = "订单属性")
   @Convert(converter = CodeValueListConverter.class)
@@ -130,6 +133,7 @@ public class OrderReceipt extends BaseJpaAggregate {
       setInvalidAmount(BigDecimal.ZERO);
     }
     setTaxCode(resultModel.getTaxCode());
+    setPhone(registerModel.getPhone());
     registerEvent(new OrderRegisterEvent(this, registerModel, resultModel));
   }
 

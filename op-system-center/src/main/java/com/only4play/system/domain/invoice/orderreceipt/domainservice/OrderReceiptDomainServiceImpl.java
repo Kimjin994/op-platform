@@ -31,8 +31,13 @@ import com.only4play.system.domain.invoice.orderreceipt.domainservice.pipeline.f
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.pipeline.filters.register.SaveRegisterLogFilter;
 import com.only4play.system.domain.invoice.orderreceipt.repository.OrderReceiptRepository;
 import com.only4play.system.domain.invoice.orderreceipt.repository.ReceiptInvoiceRelRepository;
+import com.only4play.system.domain.invoice.orderreceipt.ReceiptStatus;
+import com.only4play.system.infrastructure.constants.InvoiceErrorCode;
+import com.only4play.system.infrastructure.elastic.OrderReceiptDocument;
+import com.only4play.system.infrastructure.elastic.OrderReceiptDocumentRepository;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -49,6 +54,8 @@ public class OrderReceiptDomainServiceImpl implements IOrderReceiptDomainService
   private final InvoiceRepository invoiceRepository;
 
   private final ReceiptInvoiceRelRepository receiptInvoiceRelRepository;
+
+  private final OrderReceiptDocumentRepository orderReceiptDocumentRepository;
 
 
   @Override
@@ -98,7 +105,27 @@ public class OrderReceiptDomainServiceImpl implements IOrderReceiptDomainService
   @Override
   public ExchangeInvoiceResultModel exchangeInvoiceByCondition(
       ExchangeConditionModel conditionModel) {
-    return null;
+    return exchangeInvoice(prepareExchange(conditionModel));
+  }
+
+  @Override
+  public ExchangeInvoiceModel prepareExchange(ExchangeConditionModel conditionModel) {
+    Assert.notBlank(conditionModel.getTradeType());
+    Assert.notBlank(conditionModel.getPhone());
+    List<OrderReceiptDocument> documents = orderReceiptDocumentRepository
+        .findByTradeTypeCodeAndPhoneAndReceiptStatus(conditionModel.getTradeType(),
+            conditionModel.getPhone(), ReceiptStatus.UNMAKING.getCode());
+    if (documents.isEmpty()) {
+      throw new BusinessException(InvoiceErrorCode.RECEIPT_NOT_FOUND);
+    }
+    ExchangeInvoiceModel model = new ExchangeInvoiceModel();
+    model.setFlowNos(documents.stream().map(OrderReceiptDocument::getRegisterFlowNo)
+        .collect(Collectors.toList()));
+    model.setInvoiceStyle(conditionModel.getInvoiceStyle());
+    model.setInvoiceType(conditionModel.getInvoiceType());
+    model.setCustomerModel(conditionModel.getCustomerModel());
+    model.setPreview(conditionModel.isPreview());
+    return model;
   }
 
   @Override

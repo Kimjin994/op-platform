@@ -64,4 +64,7 @@ public class OrderReceiptDocument {
   @FieldDesc(name = "订单流水号")
   private String orderFlowNo;
 
+  @FieldDesc(name = "手机号")
+  private String phone;
+
 }

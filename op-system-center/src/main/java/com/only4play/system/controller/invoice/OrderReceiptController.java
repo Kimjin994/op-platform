@@ -6,11 +6,14 @@ import com.only4play.common.model.JsonObject;
 import com.only4play.common.model.PageRequestWrapper;
 import com.only4play.common.model.PageResult;
 import com.only4play.security.util.SpringSecurityUtils;
+import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.exchange.ExchangeConditionModel;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.exchange.ExchangeInvoiceModel;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.register.OrderRegisterModel;
 import com.only4play.system.domain.invoice.orderreceipt.mapper.OrderReceiptMapper;
 import com.only4play.system.domain.invoice.orderreceipt.query.OrderReceiptQuery;
+import com.only4play.system.domain.invoice.orderreceipt.request.ExchangeConditionRequest;
 import com.only4play.system.domain.invoice.orderreceipt.request.ExchangeInvoiceRequest;
+import com.only4play.system.domain.invoice.orderreceipt.response.ExchangeByConditionResponse;
 import com.only4play.system.domain.invoice.orderreceipt.request.OrderReceiptQueryRequest;
 import com.only4play.system.domain.invoice.orderreceipt.request.OrderReceiptUpdateRequest;
 import com.only4play.system.domain.invoice.orderreceipt.request.OrderRegisterRequest;
@@ -57,6 +60,16 @@ public class OrderReceiptController {
     ExchangeInvoiceModel model = OrderReceiptMapper.INSTANCE.request2ExchangeModel(request);
     model.setOperateUser(SpringSecurityUtils.getCurrentUsername());
     return JsonObject.success(orderReceiptService.exchangeInvoice(model));
+  }
+
+  /**
+   * 按交易类型和手机号开票。preview 为 true 时只返回票面。
+   */
+  @PostMapping("exchangeByCondition")
+  public JsonObject<ExchangeByConditionResponse> exchangeByCondition(
+      @RequestBody ExchangeConditionRequest request) {
+    ExchangeConditionModel model = OrderReceiptMapper.INSTANCE.request2ConditionModel(request);
+    return JsonObject.success(orderReceiptService.exchangeByCondition(model));
   }
 
   /**
