@@ -5,13 +5,14 @@ import com.only4play.common.constants.CodeEnum;
 import com.only4play.common.model.JsonObject;
 import com.only4play.common.model.PageRequestWrapper;
 import com.only4play.common.model.PageResult;
-import com.only4play.system.domain.invoice.orderreceipt.creator.OrderReceiptCreator;
+import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.register.OrderRegisterModel;
 import com.only4play.system.domain.invoice.orderreceipt.mapper.OrderReceiptMapper;
 import com.only4play.system.domain.invoice.orderreceipt.query.OrderReceiptQuery;
-import com.only4play.system.domain.invoice.orderreceipt.request.OrderReceiptCreateRequest;
 import com.only4play.system.domain.invoice.orderreceipt.request.OrderReceiptQueryRequest;
 import com.only4play.system.domain.invoice.orderreceipt.request.OrderReceiptUpdateRequest;
+import com.only4play.system.domain.invoice.orderreceipt.request.OrderRegisterRequest;
 import com.only4play.system.domain.invoice.orderreceipt.response.OrderReceiptResponse;
+import com.only4play.system.domain.invoice.orderreceipt.response.OrderRegisterResponse;
 import com.only4play.system.domain.invoice.orderreceipt.service.IOrderReceiptService;
 import com.only4play.system.domain.invoice.orderreceipt.updater.OrderReceiptUpdater;
 import com.only4play.system.domain.invoice.orderreceipt.vo.OrderReceiptVO;
@@ -39,9 +40,9 @@ public class OrderReceiptController {
    * createRequest
    */
   @PostMapping("createOrderReceipt")
-  public JsonObject<Long> createOrderReceipt(@RequestBody OrderReceiptCreateRequest request) {
-    OrderReceiptCreator creator = OrderReceiptMapper.INSTANCE.request2Dto(request);
-    return null;
+  public JsonObject<OrderRegisterResponse> createOrderReceipt(@RequestBody OrderRegisterRequest request) {
+    OrderRegisterModel model = OrderReceiptMapper.INSTANCE.request2RegisterModel(request);
+    return JsonObject.success(orderReceiptService.createOrderReceipt(model));
   }
 
   /**

@@ -10,6 +10,7 @@ import com.only4play.system.domain.invoice.orderreceipt.query.OrderReceiptQuery;
 import com.only4play.system.domain.invoice.orderreceipt.request.OrderReceiptCreateRequest;
 import com.only4play.system.domain.invoice.orderreceipt.request.OrderReceiptQueryRequest;
 import com.only4play.system.domain.invoice.orderreceipt.request.OrderReceiptUpdateRequest;
+import com.only4play.system.domain.invoice.orderreceipt.request.OrderRegisterRequest;
 import com.only4play.system.domain.invoice.orderreceipt.response.OrderReceiptResponse;
 import com.only4play.system.domain.invoice.orderreceipt.updater.OrderReceiptUpdater;
 import com.only4play.system.domain.invoice.orderreceipt.vo.OrderReceiptVO;
@@ -41,6 +42,8 @@ public interface OrderReceiptMapper {
   OrderReceiptDocument entity2Document(OrderReceipt entity);
 
   OrderReceipt registerModel2Entity(OrderRegisterModel model);
+
+  OrderRegisterModel request2RegisterModel(OrderRegisterRequest request);
 
   default OrderReceiptResponse vo2CustomResponse(OrderReceiptVO vo) {
     OrderReceiptResponse response = vo2Response(vo);

@@ -5,6 +5,7 @@ import com.only4play.common.model.PageRequestWrapper;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.exchange.ExchangeInvoiceModel;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.register.OrderRegisterModel;
 import com.only4play.system.domain.invoice.orderreceipt.query.OrderReceiptQuery;
+import com.only4play.system.domain.invoice.orderreceipt.response.OrderRegisterResponse;
 import com.only4play.system.domain.invoice.orderreceipt.updater.OrderReceiptUpdater;
 import com.only4play.system.domain.invoice.orderreceipt.vo.OrderReceiptVO;
 import java.lang.Long;
@@ -12,9 +13,9 @@ import org.springframework.data.domain.Page;
 
 public interface IOrderReceiptService {
   /**
-   * 注册凭据
+   * 注册凭据，返回凭据 ID 和注册流水号
    */
-  Long createOrderReceipt(OrderRegisterModel model);
+  OrderRegisterResponse createOrderReceipt(OrderRegisterModel model);
 
 
   void exchangeInvoice(ExchangeInvoiceModel exchangeInvoiceModel);

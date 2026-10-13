@@ -18,6 +18,7 @@ import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.regi
 import com.only4play.system.domain.invoice.orderreceipt.mapper.OrderReceiptMapper;
 import com.only4play.system.domain.invoice.orderreceipt.query.OrderReceiptQuery;
 import com.only4play.system.domain.invoice.orderreceipt.repository.OrderReceiptRepository;
+import com.only4play.system.domain.invoice.orderreceipt.response.OrderRegisterResponse;
 import com.only4play.system.domain.invoice.orderreceipt.updater.OrderReceiptUpdater;
 import com.only4play.system.domain.invoice.orderreceipt.vo.OrderReceiptVO;
 import com.only4play.system.infrastructure.constants.InvoiceErrorCode;
@@ -51,16 +52,20 @@ public class OrderReceiptServiceImpl implements IOrderReceiptService {
    * 订单注册为凭据
    */
   @Override
-  public Long createOrderReceipt(OrderRegisterModel model) {
+  public OrderRegisterResponse createOrderReceipt(OrderRegisterModel model) {
     OrderReceipt orderReceipt = OrderReceiptMapper.INSTANCE.registerModel2Entity(model);
-    orderReceipt.setRegisterFlowNo(flowNoFacade.getNextId());
+    Long registerFlowNo = flowNoFacade.getNextId();
+    orderReceipt.setRegisterFlowNo(registerFlowNo);
     OrderRegisterResultModel resultModel = orderReceiptDomainService.orderRegister(model);
     Optional<OrderReceipt> receipt = EntityOperations
         .doCreate(orderReceiptRepository)
         .create(() -> orderReceipt)
         .update(e -> e.orderRegister(model, resultModel))
         .execute();
-    return receipt.isPresent() ? receipt.get().getId() : 0;
+    OrderRegisterResponse response = new OrderRegisterResponse();
+    response.setId(receipt.isPresent() ? receipt.get().getId() : 0);
+    response.setRegisterFlowNo(registerFlowNo);
+    return response;
   }
 
   /**
