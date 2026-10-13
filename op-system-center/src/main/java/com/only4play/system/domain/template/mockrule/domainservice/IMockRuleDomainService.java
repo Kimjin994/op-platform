@@ -16,5 +16,5 @@ public interface IMockRuleDomainService {
      * @param templateCode
      * @return
      */
-    Map<String,Object> getMockDateByTemplateCode(String templateCode);
+    Map<String,Object> getMockDataByTemplateCode(String templateCode);
 }

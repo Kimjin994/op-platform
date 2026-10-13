@@ -38,7 +38,7 @@ public class NestedObjectMockPlugin implements IMockPlugin {
     @Override
     public Map<String, Object> getGenData(String code, Map<String, Object> params) {
         String templateCode = MapUtils.getString(params,NESTED_OBJECT_PARAM_TEMPLATE_CODE,"");
-        return listBasedGenerate(code, params, () -> mockRuleDomainService.getMockDateByTemplateCode(templateCode));
+        return listBasedGenerate(code, params, () -> mockRuleDomainService.getMockDataByTemplateCode(templateCode));
     }
 
     @Override

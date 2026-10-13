@@ -49,7 +49,7 @@ public class MockRuleDomainServiceImpl implements IMockRuleDomainService{
     }
 
     @Override
-    public Map<String, Object> getMockDateByTemplateCode(String templateCode) {
+    public Map<String, Object> getMockDataByTemplateCode(String templateCode) {
         List<TemplateItemVO> itemVos = templateService.findItemsByTemplateCode(templateCode);
         Map<String,Object> result = Maps.newHashMap();
         itemVos.stream()

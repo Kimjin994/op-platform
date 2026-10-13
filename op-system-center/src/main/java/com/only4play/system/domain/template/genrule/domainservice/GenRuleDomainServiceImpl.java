@@ -1,7 +1,10 @@
 package com.only4play.system.domain.template.genrule.domainservice;
 
 import com.google.common.collect.Maps;
+import com.only4play.common.constants.CodeEnum;
+import com.only4play.common.exception.BusinessException;
 import com.only4play.system.domain.template.genrule.rule.genrule.GenRule;
+import com.only4play.system.domain.template.objecttemplate.repository.ObjectTemplateRepository;
 import com.only4play.system.domain.template.objecttemplate.service.IObjectTemplateService;
 import com.only4play.system.domain.template.templateitem.service.ITemplateItemService;
 import com.only4play.system.domain.template.templateitem.vo.TemplateItemVO;
@@ -19,6 +22,8 @@ public class GenRuleDomainServiceImpl implements IGenRuleDomainService{
 
     private final IObjectTemplateService templateService;
 
+    private final ObjectTemplateRepository objectTemplateRepository;
+
     @Override
     public Map<String, Object> genJsonObjectMapByTemplateId(Long templateId) {
         List<TemplateItemVO> itemVos = templateService.findItemsByTemplateId(templateId);
@@ -34,5 +39,13 @@ public class GenRuleDomainServiceImpl implements IGenRuleDomainService{
                     }
                 });
         return result;
+    }
+
+    @Override
+    public Map<String, Object> genJsonObjectMapByTemplateCode(String templateCode) {
+        Long templateId = objectTemplateRepository.findByCode(templateCode)
+                .orElseThrow(() -> new BusinessException(CodeEnum.NotFindError))
+                .getId();
+        return genJsonObjectMapByTemplateId(templateId);
     }
 }

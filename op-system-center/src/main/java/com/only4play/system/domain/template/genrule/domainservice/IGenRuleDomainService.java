@@ -5,4 +5,6 @@ import java.util.Map;
 public interface IGenRuleDomainService {
 
     Map<String,Object> genJsonObjectMapByTemplateId(Long templateId);
+
+    Map<String,Object> genJsonObjectMapByTemplateCode(String templateCode);
 }
