@@ -2,7 +2,11 @@ package com.only4play.system.domain.asset.asset.domainservice;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.IdUtil;
+import com.only4play.common.constants.CodeEnum;
+import com.only4play.common.constants.ValidStatus;
 import com.only4play.common.exception.BusinessException;
+import com.only4play.system.domain.asset.warehouse.Warehouse;
+import com.only4play.system.domain.asset.warehouse.repository.WarehouseRepository;
 import com.only4play.jpa.support.EntityOperations;
 import com.only4play.system.domain.asset.asset.Asset;
 import com.only4play.system.domain.asset.asset.QAsset;
@@ -19,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -27,6 +32,8 @@ import java.util.Optional;
 public class AssetDomainServiceImpl implements IAssetDomainService {
 
     private final AssetRepository assetRepository;
+
+    private final WarehouseRepository warehouseRepository;
 
     @Override
     @Transactional
@@ -110,16 +117,29 @@ public class AssetDomainServiceImpl implements IAssetDomainService {
     @Transactional
     public void handleAssetTransfer(TransferModel transferModel) {
         Assert.notEmpty(transferModel.getUniqueCodes());
+        Assert.notNull(transferModel.getSkuId());
+        if (Objects.equals(transferModel.getTransferInHouseId(), transferModel.getTransferOutHouseId())) {
+            throw new BusinessException(AssetErrorCode.HOUSE_SAME);
+        }
+        requireValidWarehouse(transferModel.getTransferOutHouseId());
+        requireValidWarehouse(transferModel.getTransferInHouseId());
         String genBatchNo = IdUtil.simpleUUID();
         BatchInOutModel outModel = new BatchInOutModel();
         outModel.setBatchNo(transferModel.getBatchNo());
         outModel.setInOutBizType(InOutBizType.OUT_TRANSFER);
         outModel.setOperateUser(transferModel.getOperateUser());
         outModel.setHouseId(transferModel.getTransferOutHouseId());
+        outModel.setSkuId(transferModel.getSkuId());
         outModel.setUniqueCodes(transferModel.getUniqueCodes());
         handleAssetOut(outModel);
         log.info("处理出库完成，仓库id:{},批次号:{},自动批号:{}", transferModel.getTransferOutHouseId(),transferModel.getBatchNo(),genBatchNo);
-        Optional<Asset> one = assetRepository.findOne(new BooleanBuilder().and(QAsset.asset.uniqueCode.eq(transferModel.getUniqueCodes().get(0))));
+        Optional<Asset> one = assetRepository.findOne(new BooleanBuilder()
+                .and(QAsset.asset.uniqueCode.eq(transferModel.getUniqueCodes().get(0)))
+                .and(QAsset.asset.houseId.eq(transferModel.getTransferOutHouseId()))
+                .and(QAsset.asset.skuId.eq(transferModel.getSkuId())));
+        if (!one.isPresent()) {
+            throw new BusinessException(AssetErrorCode.ASSET_CODE_NOT_EXIST);
+        }
         BatchInOutModel inModel = new BatchInOutModel();
         inModel.setUniqueCodes(transferModel.getUniqueCodes());
         inModel.setName(one.get().getName());
@@ -127,8 +147,16 @@ public class AssetDomainServiceImpl implements IAssetDomainService {
         inModel.setSkuId(transferModel.getSkuId());
         inModel.setOperateUser(transferModel.getOperateUser());
         inModel.setBatchNo(transferModel.getBatchNo());
+        inModel.setHouseId(transferModel.getTransferInHouseId());
         handleAssetIn(inModel);
-        log.info("处理入库完成，仓库id:{},批次号:{},自动批号:{}", transferModel.getTransferOutHouseId(),transferModel.getBatchNo(),genBatchNo);
+        log.info("处理入库完成，仓库id:{},批次号:{},自动批号:{}", transferModel.getTransferInHouseId(),transferModel.getBatchNo(),genBatchNo);
+    }
 
+    private void requireValidWarehouse(Long houseId) {
+        Warehouse warehouse = warehouseRepository.findById(houseId)
+                .orElseThrow(() -> new BusinessException(AssetErrorCode.HOUSE_INVALID));
+        if (!Objects.equals(ValidStatus.VALID, warehouse.getValidStatus())) {
+            throw new BusinessException(AssetErrorCode.HOUSE_INVALID);
+        }
     }
 }

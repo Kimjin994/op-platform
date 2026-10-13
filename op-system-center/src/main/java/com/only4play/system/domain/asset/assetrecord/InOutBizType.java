@@ -10,7 +10,8 @@ public enum InOutBizType implements BaseEnum<InOutBizType> {
   OUT_TRANSFER(2,"调拨出库"),
   IN_TRANSFER(3,"调拨入库"),
   IN_BUY(4,"购买入库"),
-  OUT_SALE(5,"销售出库")
+  OUT_SALE(5,"销售出库"),
+  OUT_NORMAL(6,"出库")
   ;
 
   InOutBizType(Integer code, String name) {

@@ -9,6 +9,7 @@ import com.only4play.security.util.SpringSecurityUtils;
 import com.only4play.system.domain.asset.asset.mapper.AssetMapper;
 import com.only4play.system.domain.asset.asset.query.AssetQuery;
 import com.only4play.system.domain.asset.asset.request.AssetInWarehouseRequest;
+import com.only4play.system.domain.asset.asset.request.AssetOutWarehouseRequest;
 import com.only4play.system.domain.asset.asset.request.AssetQueryRequest;
 import com.only4play.system.domain.asset.asset.request.AssetTransferRequest;
 import com.only4play.system.domain.asset.asset.response.AssetResponse;
@@ -83,6 +84,16 @@ public class AssetController {
   public JsonObject<String> assetTransfer(@RequestBody AssetTransferRequest request){
     request.setOperateUser(SpringSecurityUtils.getCurrentUsername());
     assetService.assetTransfer(request);
+    return JsonObject.success(CodeEnum.Success.getName());
+  }
+
+  /**
+   * 资产出库
+   */
+  @PostMapping(value = "assetOut")
+  public JsonObject<String> assetOut(@RequestBody AssetOutWarehouseRequest request){
+    request.setOperateUser(SpringSecurityUtils.getCurrentUsername());
+    assetService.assetOut(request);
     return JsonObject.success(CodeEnum.Success.getName());
   }
 

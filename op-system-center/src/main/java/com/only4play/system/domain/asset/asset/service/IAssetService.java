@@ -4,6 +4,7 @@ package com.only4play.system.domain.asset.asset.service;
 import com.only4play.common.model.PageRequestWrapper;
 import com.only4play.system.domain.asset.asset.query.AssetQuery;
 import com.only4play.system.domain.asset.asset.request.AssetInWarehouseRequest;
+import com.only4play.system.domain.asset.asset.request.AssetOutWarehouseRequest;
 import com.only4play.system.domain.asset.asset.request.AssetTransferRequest;
 import com.only4play.system.domain.asset.asset.vo.AssetVO;
 import java.lang.Long;
@@ -32,4 +33,9 @@ public interface IAssetService {
    * @param request
    */
   void assetTransfer(AssetTransferRequest request);
+
+  /**
+   * 资产出库
+   */
+  void assetOut(AssetOutWarehouseRequest request);
 }

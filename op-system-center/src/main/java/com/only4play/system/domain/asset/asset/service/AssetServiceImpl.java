@@ -12,6 +12,7 @@ import com.only4play.system.domain.asset.asset.mapper.AssetMapper;
 import com.only4play.system.domain.asset.asset.query.AssetQuery;
 import com.only4play.system.domain.asset.asset.repository.AssetRepository;
 import com.only4play.system.domain.asset.asset.request.AssetInWarehouseRequest;
+import com.only4play.system.domain.asset.asset.request.AssetOutWarehouseRequest;
 import com.only4play.system.domain.asset.asset.request.AssetTransferRequest;
 import com.only4play.system.domain.asset.asset.vo.AssetVO;
 import com.only4play.system.domain.asset.assetrecord.InOutBizType;
@@ -76,5 +77,17 @@ public class AssetServiceImpl implements IAssetService {
   public void assetTransfer(AssetTransferRequest request) {
     TransferModel transferModel = AssetMapper.INSTANCE.request2Model(request);
     assetDomainService.handleAssetTransfer(transferModel);
+  }
+
+  @Override
+  public void assetOut(AssetOutWarehouseRequest request) {
+    BatchInOutModel batchInOutModel = new BatchInOutModel();
+    batchInOutModel.setSkuId(request.getSkuId());
+    batchInOutModel.setHouseId(request.getWarehouseId());
+    batchInOutModel.setUniqueCodes(request.getUniqueCodes());
+    batchInOutModel.setInOutBizType(InOutBizType.OUT_NORMAL);
+    batchInOutModel.setOperateUser(request.getOperateUser());
+    batchInOutModel.setBatchNo(request.getBatchNo());
+    assetDomainService.handleAssetOut(batchInOutModel);
   }
 }
