@@ -23,5 +23,7 @@ public class MessageProperties {
   @FieldDesc(name = "某类短信当天发送最多次数(根据模板判断)")
   private Integer sendMaxTimes;
 
+  @FieldDesc(name = "登录验证码模板编码")
+  private String loginTemplateCode;
 
 }

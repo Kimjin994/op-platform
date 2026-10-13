@@ -6,6 +6,7 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.NumberUtil;
 import com.google.common.collect.Iterables;
 import com.only4play.common.constants.CodeEnum;
+import com.only4play.common.constants.ValidStatus;
 import com.only4play.common.exception.BusinessException;
 import com.only4play.common.model.PageRequestWrapper;
 import com.only4play.jpa.support.EntityOperations;
@@ -24,6 +25,7 @@ import java.lang.Override;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -122,11 +124,8 @@ public class VerifyRecordServiceImpl implements IVerifyRecordService {
       return true;
     }else {
       VerifyRecord verifyRecord = Iterables.get(lastDayRecord, 0);
-      if(NumberUtil.isGreater(new BigDecimal(Instant.now().toEpochMilli()),new BigDecimal(verifyRecord.getEndTime()))){
-        return true;
-      }else {
-        return false;
-      }
+      Instant allowAt = verifyRecord.getCreatedAt().plus(messageProperties.getSendInterval(), ChronoUnit.MINUTES);
+      return Instant.now().isAfter(allowAt);
     }
   }
 
@@ -143,6 +142,31 @@ public class VerifyRecordServiceImpl implements IVerifyRecordService {
         return true;
       }
     }
+  }
+
+  @Override
+  public boolean checkVerifyCode(String account, String templateCode, String code) {
+    Assert.notNull(account);
+    Assert.notNull(templateCode);
+    Assert.notNull(code);
+    BooleanBuilder booleanBuilder = new BooleanBuilder();
+    booleanBuilder.and(QVerifyRecord.verifyRecord.account.eq(account));
+    booleanBuilder.and(QVerifyRecord.verifyRecord.templateCode.eq(templateCode));
+    booleanBuilder.and(QVerifyRecord.verifyRecord.validStatus.eq(ValidStatus.VALID));
+    Iterable<VerifyRecord> records = verifyRecordRepository.findAll(booleanBuilder,
+        Sort.by(Direction.DESC, "createdAt"));
+    if (IterUtil.isEmpty(records)) {
+      return false;
+    }
+    VerifyRecord latest = Iterables.get(records, 0);
+    if (latest.getEndTime() == null || Instant.now().toEpochMilli() > latest.getEndTime()) {
+      return false;
+    }
+    if (!Objects.equals(latest.getVerifyCode(), code)) {
+      return false;
+    }
+    invalidVerifyRecord(latest.getId());
+    return true;
   }
 
   private Iterable<VerifyRecord> lastDayRecord(String account, String templateCode){

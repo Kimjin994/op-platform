@@ -69,9 +69,10 @@ public class MessageRecordEventProcessor {
       creator.setTemplateCode(createEvent.getMessageRecord().getTemplateCode());
       creator.setContent(createEvent.getMessageRecord().getContent());
       creator.setVerifyCode(verifyCode);
-      creator.setEndTime(Instant.now().plus(messageProperties.getSendInterval(), ChronoUnit.MINUTES).toEpochMilli());
+      creator.setEndTime(Instant.now().plus(messageProperties.getValidTime(), ChronoUnit.MINUTES).toEpochMilli());
       verifyRecordService.createVerifyRecord(creator);
-      //通过mq异步发送
+      log.info("验证码已写入 verify_record，本期未真实下发，account={}, templateCode={}",
+          creator.getAccount(), creator.getTemplateCode());
     }
   }
 

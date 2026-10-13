@@ -8,13 +8,14 @@ import com.only4play.security.config.AuthErrorMsg;
 import com.only4play.security.exception.CustomAuthenticationException;
 import com.only4play.system.domain.admin.AdminUser;
 import com.only4play.system.domain.admin.repository.AdminUserRepository;
+import com.only4play.system.domain.message.verifyrecord.service.IVerifyRecordService;
+import com.only4play.system.infrastructure.config.MessageProperties;
 import com.only4play.system.infrastructure.config.SecurityProperties;
 import com.only4play.system.infrastructure.constants.AuthConstants;
 import com.only4play.system.infrastructure.constants.AuthErrorCode;
 import com.only4play.system.infrastructure.security.LoginUserType;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +36,10 @@ public class AdminSmsAuthenticationProvider extends BaseAuthenticationProvider i
 
   private final SecurityProperties securityProperties;
 
+  private final IVerifyRecordService verifyRecordService;
+
+  private final MessageProperties messageProperties;
+
   @Override
   public Authentication authenticate(Authentication authentication) throws AuthenticationException {
     AdminSmsToken token = (AdminSmsToken) authentication;
@@ -46,7 +51,8 @@ public class AdminSmsAuthenticationProvider extends BaseAuthenticationProvider i
       throw new BadCredentialsException(AuthErrorMsg.passwordIncorrect.getName());
     }else {
       //验证码校验逻辑
-      if(Objects.equals(token.getVerifyCode(),"666666")){
+      if (verifyRecordService.checkVerifyCode(token.getPhone(),
+          messageProperties.getLoginTemplateCode(), token.getVerifyCode())) {
         Map<String,Object> jwtInfo = Maps.newHashMap();
         jwtInfo.put(AuthConstants.ID,adminUser.get().getId());
         jwtInfo.put(AuthConstants.LOGIN_USER_TYPE, LoginUserType.ADMIN_USER.getCode());

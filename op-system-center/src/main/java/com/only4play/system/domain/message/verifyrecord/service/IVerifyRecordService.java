@@ -55,4 +55,9 @@ public interface IVerifyRecordService {
    * @return
    */
   boolean checkSendMaxTimes(String account, String templateCode);
+
+  /**
+   * 校验验证码，成功后作废该记录
+   */
+  boolean checkVerifyCode(String account, String templateCode, String code);
 }

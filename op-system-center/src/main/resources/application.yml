@@ -25,6 +25,8 @@ op:
     validTime: 5
     sendInterval: 1
     sendMaxTimes: 10
+    # 登录验证码模板，需事先在 message_template 中配置。本期不真实下发，验证码见 verify_record
+    loginTemplateCode: LOGIN_VERIFY
   security:
     urls:
       un-auth-urls:
