@@ -10,6 +10,7 @@ import com.only4play.system.domain.trade.order.QOrderBase;
 import com.only4play.system.domain.trade.order.domainservice.model.OrderCompleteModel;
 import com.only4play.system.domain.trade.order.domainservice.model.OrderCreateModel;
 import com.only4play.system.domain.trade.order.domainservice.model.OrderReviseModel;
+import com.only4play.system.domain.trade.order.domainservice.model.OrderReviseModel;
 import com.only4play.system.domain.trade.order.mapper.OrderBaseMapper;
 import com.only4play.system.domain.trade.order.repository.OrderBaseRepository;
 import com.only4play.system.infrastructure.facade.IFlowNoFacade;
@@ -48,7 +49,19 @@ public class OrderDomainServiceImpl implements IOrderDomainService{
 
   @Override
   public boolean orderRevise(OrderReviseModel reviseModel) {
-
+    Assert.notNull(reviseModel.getFlowNo());
+    Assert.notBlank(reviseModel.getReviseReason());
+    Assert.notEmpty(reviseModel.getAttrs());
+    BooleanBuilder bb = new BooleanBuilder().and(QOrderBase.orderBase.flowNo.eq(reviseModel.getFlowNo()));
+    Optional<OrderBase> order = orderBaseRepository.findOne(bb);
+    if (!order.isPresent()) {
+      throw new BusinessException(CodeEnum.NotFindError);
+    }
+    EntityOperations
+        .doUpdate(orderBaseRepository)
+        .load(() -> order.get())
+        .update(e -> e.revise(reviseModel))
+        .execute();
     return true;
   }
 

@@ -7,10 +7,12 @@ import com.only4play.system.domain.trade.order.OrderBase;
 import com.only4play.system.domain.trade.order.creator.OrderBaseCreator;
 import com.only4play.system.domain.trade.order.domainservice.model.OrderCompleteModel;
 import com.only4play.system.domain.trade.order.domainservice.model.OrderCreateModel;
+import com.only4play.system.domain.trade.order.domainservice.model.OrderReviseModel;
 import com.only4play.system.domain.trade.order.query.OrderBaseQuery;
 import com.only4play.system.domain.trade.order.request.OrderBaseCreateRequest;
 import com.only4play.system.domain.trade.order.request.OrderCompleteRequest;
 import com.only4play.system.domain.trade.order.request.OrderCreateRequest;
+import com.only4play.system.domain.trade.order.request.OrderReviseRequest;
 import com.only4play.system.domain.trade.order.request.OrderBaseQueryRequest;
 import com.only4play.system.domain.trade.order.request.OrderBaseUpdateRequest;
 import com.only4play.system.domain.trade.order.response.OrderBaseResponse;
@@ -48,6 +50,8 @@ public interface OrderBaseMapper {
   OrderCreateModel request2CreateModel(OrderCreateRequest request);
 
   OrderCompleteModel request2CompleteModel(OrderCompleteRequest request);
+
+  OrderReviseModel request2ReviseModel(OrderReviseRequest request);
 
   default OrderBaseResponse vo2CustomResponse(OrderBaseVO vo) {
     OrderBaseResponse response = vo2Response(vo);

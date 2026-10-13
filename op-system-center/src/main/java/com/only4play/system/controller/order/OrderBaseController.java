@@ -9,12 +9,14 @@ import com.only4play.security.util.SpringSecurityUtils;
 import com.only4play.system.domain.trade.order.domainservice.IOrderDomainService;
 import com.only4play.system.domain.trade.order.domainservice.model.OrderCompleteModel;
 import com.only4play.system.domain.trade.order.domainservice.model.OrderCreateModel;
+import com.only4play.system.domain.trade.order.domainservice.model.OrderReviseModel;
 import com.only4play.system.domain.trade.order.mapper.OrderBaseMapper;
 import com.only4play.system.domain.trade.order.query.OrderBaseQuery;
 import com.only4play.system.domain.trade.order.request.OrderBaseQueryRequest;
 import com.only4play.system.domain.trade.order.request.OrderBaseUpdateRequest;
 import com.only4play.system.domain.trade.order.request.OrderCompleteRequest;
 import com.only4play.system.domain.trade.order.request.OrderCreateRequest;
+import com.only4play.system.domain.trade.order.request.OrderReviseRequest;
 import com.only4play.system.domain.trade.order.response.OrderBaseResponse;
 import com.only4play.system.domain.trade.order.service.IOrderBaseService;
 import com.only4play.system.domain.trade.order.updater.OrderBaseUpdater;
@@ -67,6 +69,17 @@ public class OrderBaseController {
   @PostMapping("cancel/{flowNo}")
   public JsonObject<String> cancel(@PathVariable Long flowNo) {
     orderDomainService.orderCancel(flowNo);
+    return JsonObject.success(CodeEnum.Success.getName());
+  }
+
+  /**
+   * 修订订单属性
+   */
+  @PostMapping("revise")
+  public JsonObject<String> revise(@RequestBody OrderReviseRequest request) {
+    OrderReviseModel model = OrderBaseMapper.INSTANCE.request2ReviseModel(request);
+    model.setOperateUser(SpringSecurityUtils.getCurrentUsername());
+    orderDomainService.orderRevise(model);
     return JsonObject.success(CodeEnum.Success.getName());
   }
 

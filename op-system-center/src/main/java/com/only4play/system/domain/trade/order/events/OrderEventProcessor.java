@@ -1,11 +1,18 @@
 package com.only4play.system.domain.trade.order.events;
 
+import com.alibaba.fastjson.JSON;
 import com.only4play.security.util.SpringSecurityUtils;
 import com.only4play.system.domain.trade.order.OrderBase;
 import com.only4play.system.domain.trade.order.domainservice.model.OrderItemModel;
 import com.only4play.system.domain.trade.order.events.OrderEvents.OrderCancelEvent;
 import com.only4play.system.domain.trade.order.events.OrderEvents.OrderCompleteEvent;
 import com.only4play.system.domain.trade.order.events.OrderEvents.OrderCreateEvent;
+import com.only4play.system.domain.trade.order.events.OrderEvents.OrderReviseEvent;
+import com.only4play.system.domain.trade.reviserecord.creator.ReviseRecordCreator;
+import com.only4play.system.domain.trade.reviserecord.service.IReviseRecordService;
+import com.only4play.system.infrastructure.model.CodeValue;
+import org.javers.core.Javers;
+import org.javers.core.JaversBuilder;
 import com.only4play.system.domain.trade.order.mapper.OrderBaseMapper;
 import com.only4play.system.domain.trade.orderitem.creator.OrderItemCreator;
 import com.only4play.system.domain.trade.orderitem.mapper.OrderItemMapper;
@@ -33,6 +40,8 @@ public class OrderEventProcessor {
 
   private final OrderDocumentRepository orderDocumentRepository;
 
+  private final IReviseRecordService reviseRecordService;
+
   @EventListener
   public void handleOrderCreateForEs(OrderCreateEvent createEvent){
     OrderBase orderBase = createEvent.getOrderBase();
@@ -42,6 +51,25 @@ public class OrderEventProcessor {
     document.setOrderTypeTxt(orderBase.getOrderType().getName());
     document.setOrderItems(createEvent.getCreateModel().getItemInfoList());
     orderDocumentRepository.save(document);
+  }
+
+  @EventListener
+  public void handleOrderRevise(OrderReviseEvent event) {
+    OrderBase orderBase = event.getOrderBase();
+    Javers javers = JaversBuilder.javers().build();
+    String diff = javers.compareCollections(event.getBeforeAttrs(), event.getAfterAttrs(), CodeValue.class)
+        .prettyPrint();
+    ReviseRecordCreator creator = new ReviseRecordCreator();
+    creator.setOperateUser(event.getOperateUser());
+    creator.setFlowNo(orderBase.getFlowNo());
+    creator.setReviseBefore(JSON.toJSONString(event.getBeforeAttrs()));
+    creator.setReviseAfter(JSON.toJSONString(event.getAfterAttrs()));
+    creator.setDiff(diff);
+    creator.setTableName("order_base");
+    creator.setReviseReason(event.getReviseReason());
+    reviseRecordService.createReviseRecord(creator);
+    syncOrderDocument(orderBase);
+    writeLifecycle(orderBase.getFlowNo(), OrderOperateType.REVISE, event.getReviseReason());
   }
 
   @EventListener
@@ -70,6 +98,7 @@ public class OrderEventProcessor {
     orderDocument.setOrderStatusTxt(orderBase.getOrderState().getName());
     orderDocument.setPayTime(orderBase.getPayTime());
     orderDocument.setPayList(orderBase.getPayList());
+    orderDocument.setAttrs(orderBase.getAttrs());
     orderDocumentRepository.save(orderDocument);
   }
 

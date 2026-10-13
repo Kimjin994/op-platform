@@ -3,7 +3,8 @@ package com.only4play.system.domain.trade.order.events;
 import com.only4play.system.domain.trade.order.OrderBase;
 import com.only4play.system.domain.trade.order.domainservice.model.OrderCompleteModel;
 import com.only4play.system.domain.trade.order.domainservice.model.OrderCreateModel;
-import com.only4play.system.domain.trade.order.domainservice.model.OrderReviseModel;
+import com.only4play.system.infrastructure.model.CodeValue;
+import java.util.List;
 import lombok.Value;
 
 public interface OrderEvents {
@@ -35,7 +36,10 @@ public interface OrderEvents {
   class OrderReviseEvent {
 
     private OrderBase orderBase;
-    private OrderReviseModel reviseModel;
+    private List<CodeValue> beforeAttrs;
+    private List<CodeValue> afterAttrs;
+    private String reviseReason;
+    private String operateUser;
   }
 
   /**
