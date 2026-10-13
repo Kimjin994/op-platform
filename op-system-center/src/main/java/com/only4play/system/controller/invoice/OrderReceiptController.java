@@ -21,6 +21,7 @@ import com.only4play.system.domain.invoice.orderreceipt.updater.OrderReceiptUpda
 import com.only4play.system.domain.invoice.orderreceipt.vo.OrderReceiptVO;
 import java.lang.Long;
 import java.lang.String;
+import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -56,6 +57,15 @@ public class OrderReceiptController {
     ExchangeInvoiceModel model = OrderReceiptMapper.INSTANCE.request2ExchangeModel(request);
     model.setOperateUser(SpringSecurityUtils.getCurrentUsername());
     return JsonObject.success(orderReceiptService.exchangeInvoice(model));
+  }
+
+  /**
+   * 作废未开票凭据
+   */
+  @PostMapping("abandon")
+  public JsonObject<String> abandon(@RequestBody List<Long> ids) {
+    orderReceiptService.abandonReceipts(ids);
+    return JsonObject.success(CodeEnum.Success.getName());
   }
 
   /**

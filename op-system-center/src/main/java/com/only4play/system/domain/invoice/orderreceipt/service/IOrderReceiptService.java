@@ -9,6 +9,7 @@ import com.only4play.system.domain.invoice.orderreceipt.response.OrderRegisterRe
 import com.only4play.system.domain.invoice.orderreceipt.updater.OrderReceiptUpdater;
 import com.only4play.system.domain.invoice.orderreceipt.vo.OrderReceiptVO;
 import java.lang.Long;
+import java.util.List;
 import org.springframework.data.domain.Page;
 
 public interface IOrderReceiptService {
@@ -22,6 +23,11 @@ public interface IOrderReceiptService {
    * 凭据换发票，返回批次号
    */
   String exchangeInvoice(ExchangeInvoiceModel exchangeInvoiceModel);
+
+  /**
+   * 作废未开票凭据
+   */
+  void abandonReceipts(List<Long> ids);
   /**
    * update
    */

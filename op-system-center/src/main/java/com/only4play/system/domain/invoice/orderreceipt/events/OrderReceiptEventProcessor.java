@@ -4,12 +4,14 @@ import com.only4play.system.domain.invoice.orderreceipt.OrderReceipt;
 import com.only4play.system.domain.invoice.orderreceipt.creator.ReceiptItemCreator;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.register.OrderRegisterResultModel.ReceiptItemModel;
 import com.only4play.system.domain.invoice.orderreceipt.events.OrderReceiptEvents.OrderRegisterEvent;
+import com.only4play.system.domain.invoice.orderreceipt.events.OrderReceiptEvents.ReceiptAbandonEvent;
 import com.only4play.system.domain.invoice.orderreceipt.mapper.OrderReceiptMapper;
 import com.only4play.system.domain.invoice.orderreceipt.mapper.ReceiptItemMapper;
 import com.only4play.system.domain.invoice.orderreceipt.service.IReceiptItemService;
 import com.only4play.system.infrastructure.elastic.OrderReceiptDocument;
 import com.only4play.system.infrastructure.elastic.OrderReceiptDocumentRepository;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +59,20 @@ public class OrderReceiptEventProcessor {
         })
         .collect(Collectors.toList());
     receiptItemService.batchCreateReceiptItems(creators);
+  }
+
+  @EventListener
+  public void handleReceiptAbandon(ReceiptAbandonEvent event) {
+    OrderReceipt orderReceipt = event.getOrderReceipt();
+    Optional<OrderReceiptDocument> document = orderReceiptDocumentRepository.findById(
+        String.valueOf(orderReceipt.getRegisterFlowNo()));
+    if (!document.isPresent()) {
+      log.warn("ES 中没有凭据文档, registerFlowNo={}", orderReceipt.getRegisterFlowNo());
+      return;
+    }
+    OrderReceiptDocument receiptDocument = document.get();
+    receiptDocument.setReceiptStatus(orderReceipt.getReceiptStatus().getCode());
+    orderReceiptDocumentRepository.save(receiptDocument);
   }
 
 }

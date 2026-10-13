@@ -10,18 +10,22 @@ import com.only4play.codegen.processor.updater.IgnoreUpdater;
 import com.only4play.codegen.processor.vo.GenVo;
 import com.only4play.common.annotation.FieldDesc;
 import com.only4play.common.constants.ValidStatus;
+import com.only4play.common.exception.BusinessException;
 import com.only4play.jpa.converter.ValidStatusConverter;
 import com.only4play.jpa.support.BaseJpaAggregate;
 import com.only4play.order.commons.pay.PayItem;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.register.OrderRegisterModel;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.register.OrderRegisterResultModel;
 import com.only4play.system.domain.invoice.orderreceipt.events.OrderReceiptEvents.OrderRegisterEvent;
+import com.only4play.system.domain.invoice.orderreceipt.events.OrderReceiptEvents.ReceiptAbandonEvent;
+import com.only4play.system.infrastructure.constants.InvoiceErrorCode;
 import com.only4play.system.infrastructure.converter.CodeValueListConverter;
 import com.only4play.system.infrastructure.converter.PayItemListConverter;
 import com.only4play.system.infrastructure.model.CodeValue;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
@@ -126,6 +130,17 @@ public class OrderReceipt extends BaseJpaAggregate {
     }
     setTaxCode(resultModel.getTaxCode());
     registerEvent(new OrderRegisterEvent(this, registerModel, resultModel));
+  }
+
+  /**
+   * 未开票凭据作废
+   */
+  public void abandon() {
+    if (!Objects.equals(ReceiptStatus.UNMAKING, getReceiptStatus())) {
+      throw new BusinessException(InvoiceErrorCode.RECEIPT_NOT_ALLOW_ABANDON);
+    }
+    setReceiptStatus(ReceiptStatus.ABANDON);
+    registerEvent(new ReceiptAbandonEvent(this));
   }
 
 

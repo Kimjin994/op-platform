@@ -17,4 +17,10 @@ public interface OrderReceiptEvents {
     private OrderRegisterResultModel registerResultModel;
   }
 
+  @Value
+  class ReceiptAbandonEvent {
+
+    private OrderReceipt orderReceipt;
+  }
+
 }

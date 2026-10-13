@@ -1,5 +1,8 @@
 package com.only4play.system.domain.invoice.orderreceipt.domainservice;
 
+import cn.hutool.core.lang.Assert;
+import com.only4play.jpa.support.EntityOperations;
+import com.only4play.system.domain.invoice.orderreceipt.OrderReceipt;
 import com.only4play.order.commons.constants.BizEnum;
 import com.only4play.order.commons.filters.selector.FilterSelector;
 import com.only4play.order.commons.filters.selector.LocalListBasedFilterSelector;
@@ -19,6 +22,7 @@ import com.only4play.system.domain.invoice.orderreceipt.domainservice.pipeline.f
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.pipeline.filters.register.EnterpriseRouterFilter;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.pipeline.filters.register.PopulateReceiptItemFilter;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.pipeline.filters.register.SaveRegisterLogFilter;
+import com.only4play.system.domain.invoice.orderreceipt.repository.OrderReceiptRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,6 +34,8 @@ public class OrderReceiptDomainServiceImpl implements IOrderReceiptDomainService
   private final FilterChainPipeline orderRegisterPipeline;
 
   private final FilterChainPipeline exchangeInvoicePipeline;
+
+  private final OrderReceiptRepository orderReceiptRepository;
 
 
   @Override
@@ -49,7 +55,14 @@ public class OrderReceiptDomainServiceImpl implements IOrderReceiptDomainService
 
   @Override
   public boolean receiptAbandon(List<Long> ids) {
-    return false;
+    Assert.notEmpty(ids);
+    for (Long id : ids) {
+      EntityOperations.doUpdate(orderReceiptRepository)
+          .loadById(id)
+          .update(OrderReceipt::abandon)
+          .execute();
+    }
+    return true;
   }
 
   /**

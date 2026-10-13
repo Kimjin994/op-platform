@@ -101,6 +101,11 @@ public class OrderReceiptServiceImpl implements IOrderReceiptService {
     return batchNo;
   }
 
+  @Override
+  public void abandonReceipts(List<Long> ids) {
+    orderReceiptDomainService.receiptAbandon(ids);
+  }
+
   /**
    * update
    */
