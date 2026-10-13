@@ -18,7 +18,10 @@ public interface IOrderReceiptService {
   OrderRegisterResponse createOrderReceipt(OrderRegisterModel model);
 
 
-  void exchangeInvoice(ExchangeInvoiceModel exchangeInvoiceModel);
+  /**
+   * 凭据换发票，返回批次号
+   */
+  String exchangeInvoice(ExchangeInvoiceModel exchangeInvoiceModel);
   /**
    * update
    */

@@ -5,9 +5,12 @@ import com.only4play.common.constants.CodeEnum;
 import com.only4play.common.model.JsonObject;
 import com.only4play.common.model.PageRequestWrapper;
 import com.only4play.common.model.PageResult;
+import com.only4play.security.util.SpringSecurityUtils;
+import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.exchange.ExchangeInvoiceModel;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.register.OrderRegisterModel;
 import com.only4play.system.domain.invoice.orderreceipt.mapper.OrderReceiptMapper;
 import com.only4play.system.domain.invoice.orderreceipt.query.OrderReceiptQuery;
+import com.only4play.system.domain.invoice.orderreceipt.request.ExchangeInvoiceRequest;
 import com.only4play.system.domain.invoice.orderreceipt.request.OrderReceiptQueryRequest;
 import com.only4play.system.domain.invoice.orderreceipt.request.OrderReceiptUpdateRequest;
 import com.only4play.system.domain.invoice.orderreceipt.request.OrderRegisterRequest;
@@ -43,6 +46,16 @@ public class OrderReceiptController {
   public JsonObject<OrderRegisterResponse> createOrderReceipt(@RequestBody OrderRegisterRequest request) {
     OrderRegisterModel model = OrderReceiptMapper.INSTANCE.request2RegisterModel(request);
     return JsonObject.success(orderReceiptService.createOrderReceipt(model));
+  }
+
+  /**
+   * 凭据开票，返回批次号
+   */
+  @PostMapping("exchangeInvoice")
+  public JsonObject<String> exchangeInvoice(@RequestBody ExchangeInvoiceRequest request) {
+    ExchangeInvoiceModel model = OrderReceiptMapper.INSTANCE.request2ExchangeModel(request);
+    model.setOperateUser(SpringSecurityUtils.getCurrentUsername());
+    return JsonObject.success(orderReceiptService.exchangeInvoice(model));
   }
 
   /**

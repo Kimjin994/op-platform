@@ -73,23 +73,20 @@ public class OrderReceiptServiceImpl implements IOrderReceiptService {
    * @param exchangeInvoiceModel
    */
   @Override
-  public void exchangeInvoice(ExchangeInvoiceModel exchangeInvoiceModel) {
+  public String exchangeInvoice(ExchangeInvoiceModel exchangeInvoiceModel) {
+    String batchNo = String.valueOf(flowNoFacade.getNextId());
+    exchangeInvoiceModel.setBatchNo(batchNo);
     ExchangeInvoiceResultModel resultModel = orderReceiptDomainService.exchangeInvoice(
         exchangeInvoiceModel);
     List<Long> flowNos = exchangeInvoiceModel.getFlowNos();
-    exchangeInvoiceModel.setBatchNo(String.valueOf(flowNoFacade.getNextId()));
-    //从性能上讲可以优化为批量操作，对于对象本身来讲，开票行为属于每个个体，技术和现实需要折中处理,这里要避免事件嵌套
-    //将凭据批量更新为开票中，同时生成发票信息
     List<OrderReceipt> receiptList = orderReceiptRepository.findAllByRegisterFlowNoIn(
         flowNos);
     List<OrderReceipt> notUnMakingList = receiptList.stream()
         .filter(r -> !Objects.equals(r.getReceiptStatus(), ReceiptStatus.UNMAKING)).collect(
             Collectors.toList());
     if(IterUtil.isNotEmpty(notUnMakingList)){
-      //如果存在不是未开票的则报错,并且将列表返回去
       throw new BusinessException(InvoiceErrorCode.INVOICE_NOT_ALLOW, notUnMakingList);
     }
-    //批量修改为开票中
     receiptList.stream().forEach(r -> r.setReceiptStatus(ReceiptStatus.MAKING));
     orderReceiptRepository.saveAll(receiptList);
     resultModel.getInvoiceList().forEach(invoiceModel -> {
@@ -101,7 +98,7 @@ public class OrderReceiptServiceImpl implements IOrderReceiptService {
           .update(e -> e.doCreate(exchangeInvoiceModel,invoiceModel))
           .execute();
     });
-
+    return batchNo;
   }
 
   /**
