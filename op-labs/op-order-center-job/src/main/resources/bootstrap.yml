@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: order-center-job
+  cloud:
+    nacos:
+      discovery:
+        server-addr: @nacos.url@
+        namespace: only4play
+      config:
+        server-addr: @nacos.url@
+        namespace: public
+        group: DEFAULT_GROUP
+        fileExtension: yaml
+  profiles:
+    active: @profiles.active@
+  batch:
+    job:
+      enabled: false
+server:
+  port: 8101

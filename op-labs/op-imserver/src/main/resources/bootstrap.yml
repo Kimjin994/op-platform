@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: imserver
+  cloud:
+    nacos:
+      discovery:
+        server-addr: @nacos.url@
+        namespace: only4play
+      config:
+        server-addr: @nacos.url@
+        namespace: public
+        group: DEFAULT_GROUP
+        fileExtension: yaml
+  profiles:
+    active: @profiles.active@
+server:
+  port: 8089
+op:
+  ws:
+    port: 9999
+    path: /ws

@@ -1,0 +1,28 @@
+package {{#packageName}}{{this}}{{/packageName}};
+
+import lombok.Data;
+
+@Data
+public class {{#table}}{{this}}{{/table}} {
+  {{#columList}}
+  @FieldDesc(name="{{this.comment}}")
+  {{#this.ignoreVo}}
+  @IgnoreVo
+  {{/this.ignoreVo}}
+  {{#this.ignoreCreator}}
+  @IgnoreCreator
+  {{/this.ignoreCreator}}
+  {{#this.ignoreUpdater}}
+  @IgnoreUpdater
+  {{/this.ignoreUpdater}}
+  {{#this.queryItem}}
+  @QueryItem
+  {{/this.queryItem}}
+  {{#this.primaryKey}}
+  @TableId(type = IdType.AUTO)
+  {{/this.primaryKey}}
+  @TableField(value = "{{this.name}}")
+  {{this.customStr}}
+  private {{this.javaType}} {{this.fieldName}};
+  {{/columList}}
+}

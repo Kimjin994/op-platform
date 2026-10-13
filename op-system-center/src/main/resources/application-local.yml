@@ -1,0 +1,27 @@
+# 零依赖启动：内存 H2，不连 Nacos / ES。
+# 写 ES 的链路（下单、开票的同步事件）在这个 profile 下会失败，需要时切到 dev。
+spring:
+  datasource:
+    url: jdbc:h2:mem:system-center;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    defer-datasource-initialization: true
+  sql:
+    init:
+      mode: embedded
+      data-locations: classpath:db/local-data.sql
+
+management:
+  health:
+    elasticsearch:
+      enabled: false
+
+es:
+  enabled: false
+  nodes:
+    - 127.0.0.1:9200
+  username: elastic
+  password: elastic

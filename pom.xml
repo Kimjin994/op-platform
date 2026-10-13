@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.only4play</groupId>
+  <artifactId>op-platform</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <description>only4play 领域服务实战工程聚合</description>
+
+  <modules>
+    <module>op-parent</module>
+    <module>op-framework</module>
+    <module>op-system-center</module>
+  </modules>
+
+  <profiles>
+    <!-- 练习工程：mvn install -Plabs -->
+    <profile>
+      <id>labs</id>
+      <modules>
+        <module>op-labs</module>
+      </modules>
+    </profile>
+  </profiles>
+</project>

@@ -1,0 +1,50 @@
+package com.only4play.system.infrastructure.security.authorization;
+
+import cn.hutool.jwt.JWT;
+import cn.hutool.jwt.JWTUtil;
+import com.only4play.security.base.BaseJwtUser;
+import com.only4play.security.base.extension.DummyJwtUser;
+import com.only4play.security.base.extension.UserContextAware;
+import com.only4play.security.config.AuthErrorMsg;
+import com.only4play.security.exception.CustomAuthenticationException;
+import com.only4play.system.domain.admin.service.IAdminUserService;
+import com.only4play.system.domain.admin.vo.AdminUserVO;
+import com.only4play.system.infrastructure.config.SecurityProperties;
+import com.only4play.system.infrastructure.constants.AuthConstants;
+import com.only4play.system.infrastructure.security.LoginUserType;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+/**
+ * 解析token 放入用户上下文
+ */
+@Component
+@RequiredArgsConstructor
+public class AdminUserContextAware implements UserContextAware {
+
+  private final SecurityProperties securityProperties;
+
+  private final IAdminUserService adminUserService;
+
+  @Override
+  public BaseJwtUser processToken(String token) {
+    boolean pass = JWTUtil.verify(token, securityProperties.getSecret().getBytes(StandardCharsets.UTF_8));
+    if(!pass){
+      throw new CustomAuthenticationException(AuthErrorMsg.tokenIllegal.getCode(),AuthErrorMsg.tokenIllegal.getName());
+    }
+    JWT jwt = JWTUtil.parseToken(token);
+    Long userId = Long.valueOf(jwt.getPayload().getClaim(AuthConstants.ID).toString());
+    LoginUserType type = LoginUserType.of(Integer.valueOf(jwt.getPayload().getClaim(AuthConstants.LOGIN_USER_TYPE).toString())).get();
+    if(Objects.equals(LoginUserType.ADMIN_USER,type)){
+        //如果是后台用户，查询用户信息，并授权
+      AdminUserVO vo = adminUserService.findById(userId);
+      SystemJwtUser systemJwtUser = new SystemJwtUser();
+      systemJwtUser.setUsername(vo.getUsername());
+
+      return systemJwtUser;
+    }
+    return new DummyJwtUser();
+  }
+}

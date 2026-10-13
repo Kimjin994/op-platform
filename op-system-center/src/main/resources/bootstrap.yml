@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: system-center
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:@profiles.active@}
+  cloud:
+    nacos:
+      discovery:
+        enabled: ${NACOS_ENABLED:false}
+        server-addr: ${NACOS_ADDR:@nacos.url@}
+        namespace: public
+      config:
+        enabled: ${NACOS_ENABLED:false}
+        server-addr: ${NACOS_ADDR:@nacos.url@}
+        namespace: public
+        group: DEFAULT_GROUP
+        file-extension: yaml
