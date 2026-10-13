@@ -38,7 +38,7 @@ public class OrderBaseServiceImpl implements IOrderBaseService {
    */
   @Override
   public Long createOrderBase(OrderBaseCreator creator) {
-    return 0L;
+    throw new BusinessException(CodeEnum.ParamSetIllegal);
   }
 
   /**

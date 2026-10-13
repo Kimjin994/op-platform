@@ -5,9 +5,12 @@ import com.only4play.common.mapper.DateMapper;
 import com.only4play.common.mapper.GenericEnumMapper;
 import com.only4play.system.domain.trade.order.OrderBase;
 import com.only4play.system.domain.trade.order.creator.OrderBaseCreator;
+import com.only4play.system.domain.trade.order.domainservice.model.OrderCompleteModel;
 import com.only4play.system.domain.trade.order.domainservice.model.OrderCreateModel;
 import com.only4play.system.domain.trade.order.query.OrderBaseQuery;
 import com.only4play.system.domain.trade.order.request.OrderBaseCreateRequest;
+import com.only4play.system.domain.trade.order.request.OrderCompleteRequest;
+import com.only4play.system.domain.trade.order.request.OrderCreateRequest;
 import com.only4play.system.domain.trade.order.request.OrderBaseQueryRequest;
 import com.only4play.system.domain.trade.order.request.OrderBaseUpdateRequest;
 import com.only4play.system.domain.trade.order.response.OrderBaseResponse;
@@ -41,6 +44,10 @@ public interface OrderBaseMapper {
   OrderDocument entity2Document(OrderBase entity);
 
   OrderBase model2Entity(OrderCreateModel createModel);
+
+  OrderCreateModel request2CreateModel(OrderCreateRequest request);
+
+  OrderCompleteModel request2CompleteModel(OrderCompleteRequest request);
 
   default OrderBaseResponse vo2CustomResponse(OrderBaseVO vo) {
     OrderBaseResponse response = vo2Response(vo);

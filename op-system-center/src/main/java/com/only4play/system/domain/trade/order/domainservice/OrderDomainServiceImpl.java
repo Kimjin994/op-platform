@@ -30,7 +30,7 @@ public class OrderDomainServiceImpl implements IOrderDomainService{
   private final IFlowNoFacade flowNoFacade;
 
   @Override
-  public boolean orderCreate(OrderCreateModel createModel) {
+  public Long orderCreate(OrderCreateModel createModel) {
     Assert.notEmpty(createModel.getItemInfoList());
     BigDecimal itemTotal = createModel.getItemInfoList().stream().map(p -> p.getRealAmount())
         .reduce(BigDecimal.ZERO, (a, b) -> (NumberUtil.add(a, b)));
@@ -43,7 +43,7 @@ public class OrderDomainServiceImpl implements IOrderDomainService{
         .create(() -> orderBase)
         .update(e -> e.init(createModel))
         .execute();
-    return true;
+    return flowNo;
   }
 
   @Override

@@ -5,12 +5,16 @@ import com.only4play.common.constants.CodeEnum;
 import com.only4play.common.model.JsonObject;
 import com.only4play.common.model.PageRequestWrapper;
 import com.only4play.common.model.PageResult;
-import com.only4play.system.domain.trade.order.creator.OrderBaseCreator;
+import com.only4play.security.util.SpringSecurityUtils;
+import com.only4play.system.domain.trade.order.domainservice.IOrderDomainService;
+import com.only4play.system.domain.trade.order.domainservice.model.OrderCompleteModel;
+import com.only4play.system.domain.trade.order.domainservice.model.OrderCreateModel;
 import com.only4play.system.domain.trade.order.mapper.OrderBaseMapper;
 import com.only4play.system.domain.trade.order.query.OrderBaseQuery;
-import com.only4play.system.domain.trade.order.request.OrderBaseCreateRequest;
 import com.only4play.system.domain.trade.order.request.OrderBaseQueryRequest;
 import com.only4play.system.domain.trade.order.request.OrderBaseUpdateRequest;
+import com.only4play.system.domain.trade.order.request.OrderCompleteRequest;
+import com.only4play.system.domain.trade.order.request.OrderCreateRequest;
 import com.only4play.system.domain.trade.order.response.OrderBaseResponse;
 import com.only4play.system.domain.trade.order.service.IOrderBaseService;
 import com.only4play.system.domain.trade.order.updater.OrderBaseUpdater;
@@ -35,13 +39,35 @@ import org.springframework.web.bind.annotation.RestController;
 public class OrderBaseController {
   private final IOrderBaseService orderBaseService;
 
+  private final IOrderDomainService orderDomainService;
+
   /**
-   * createRequest
+   * 创建订单，返回流水号
    */
   @PostMapping("createOrderBase")
-  public JsonObject<Long> createOrderBase(@RequestBody OrderBaseCreateRequest request) {
-    OrderBaseCreator creator = OrderBaseMapper.INSTANCE.request2Dto(request);
-    return JsonObject.success(orderBaseService.createOrderBase(creator));
+  public JsonObject<Long> createOrderBase(@RequestBody OrderCreateRequest request) {
+    OrderCreateModel model = OrderBaseMapper.INSTANCE.request2CreateModel(request);
+    model.setOperateUser(SpringSecurityUtils.getCurrentUsername());
+    return JsonObject.success(orderDomainService.orderCreate(model));
+  }
+
+  /**
+   * 完成待支付订单
+   */
+  @PostMapping("complete")
+  public JsonObject<String> complete(@RequestBody OrderCompleteRequest request) {
+    OrderCompleteModel model = OrderBaseMapper.INSTANCE.request2CompleteModel(request);
+    orderDomainService.orderComplete(model);
+    return JsonObject.success(CodeEnum.Success.getName());
+  }
+
+  /**
+   * 取消待支付订单
+   */
+  @PostMapping("cancel/{flowNo}")
+  public JsonObject<String> cancel(@PathVariable Long flowNo) {
+    orderDomainService.orderCancel(flowNo);
+    return JsonObject.success(CodeEnum.Success.getName());
   }
 
   /**

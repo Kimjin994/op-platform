@@ -9,9 +9,9 @@ public interface IOrderDomainService {
   /**
    * 创建订单
    * @param createModel
-   * @return
+   * @return 订单流水号
    */
-  boolean orderCreate(OrderCreateModel createModel);
+  Long orderCreate(OrderCreateModel createModel);
 
   /**
    * 订单修订
