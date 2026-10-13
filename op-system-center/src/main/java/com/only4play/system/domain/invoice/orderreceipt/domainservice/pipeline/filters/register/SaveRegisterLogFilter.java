@@ -2,6 +2,7 @@ package com.only4play.system.domain.invoice.orderreceipt.domainservice.pipeline.
 
 import com.only4play.order.commons.filters.AbstractOrderFilter;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.pipeline.context.OrderReceiptContext;
+import com.only4play.system.domain.invoice.requestlog.InvoiceRequestLogService;
 import com.only4play.system.infrastructure.facade.IInvoicePipeLineFacadeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,10 +16,11 @@ public class SaveRegisterLogFilter extends AbstractOrderFilter<OrderReceiptConte
 
   private final IInvoicePipeLineFacadeService pipeLineFacadeService;
 
+  private final InvoiceRequestLogService invoiceRequestLogService;
+
   @Override
   protected void handle(OrderReceiptContext orderReceiptContext) {
-
-    log.info("执行保存注册请求体:{}",SaveRegisterLogFilter.class.getSimpleName());
-
+    invoiceRequestLogService.save(InvoiceRequestLogService.REGISTER,
+        orderReceiptContext.getModel().getOrderFlowNo(), orderReceiptContext.getModel());
   }
 }

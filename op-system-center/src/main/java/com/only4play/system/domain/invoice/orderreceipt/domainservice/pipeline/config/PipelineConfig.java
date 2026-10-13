@@ -9,6 +9,7 @@ import com.only4play.system.domain.invoice.orderreceipt.domainservice.pipeline.f
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.pipeline.filters.register.EnterpriseRouterFilter;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.pipeline.filters.register.PopulateReceiptItemFilter;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.pipeline.filters.register.SaveRegisterLogFilter;
+import com.only4play.system.domain.invoice.requestlog.InvoiceRequestLogService;
 import com.only4play.system.infrastructure.facade.IInvoicePipeLineFacadeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +20,9 @@ public class PipelineConfig {
 
   @Autowired
   private IInvoicePipeLineFacadeService pipeLineFacadeService;
+
+  @Autowired
+  private InvoiceRequestLogService invoiceRequestLogService;
 
   /**
    * 订单注册pipeline
@@ -52,7 +56,7 @@ public class PipelineConfig {
 
   @Bean
   public SaveRegisterLogFilter saveRegisterLogFilter(){
-    return new SaveRegisterLogFilter(pipeLineFacadeService);
+    return new SaveRegisterLogFilter(pipeLineFacadeService, invoiceRequestLogService);
   }
 
 
@@ -72,7 +76,7 @@ public class PipelineConfig {
 
   @Bean
   public SaveExchangeLogFilter saveExchangeLogFilter(){
-    return new SaveExchangeLogFilter(pipeLineFacadeService);
+    return new SaveExchangeLogFilter(pipeLineFacadeService, invoiceRequestLogService);
   }
 
   @Bean

@@ -2,6 +2,7 @@ package com.only4play.system.domain.invoice.orderreceipt.domainservice.pipeline.
 
 import com.only4play.order.commons.filters.AbstractOrderFilter;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.pipeline.context.ExchangeInvoiceContext;
+import com.only4play.system.domain.invoice.requestlog.InvoiceRequestLogService;
 import com.only4play.system.infrastructure.facade.IInvoicePipeLineFacadeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,9 +13,12 @@ public class SaveExchangeLogFilter extends AbstractOrderFilter<ExchangeInvoiceCo
 
   private final IInvoicePipeLineFacadeService invoicePipeLineFacadeService;
 
+  private final InvoiceRequestLogService invoiceRequestLogService;
+
   @Override
   protected void handle(ExchangeInvoiceContext exchangeInvoiceContext) {
-      log.info("保存请求记录");
-      log.info("SaveExchangeLogFilter");
+    invoiceRequestLogService.save(InvoiceRequestLogService.EXCHANGE,
+        exchangeInvoiceContext.getExchangeInvoiceModel().getBatchNo(),
+        exchangeInvoiceContext.getExchangeInvoiceModel());
   }
 }
