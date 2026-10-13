@@ -1,8 +1,10 @@
 package com.only4play.system.domain.trade.order.events;
 
+import com.only4play.security.util.SpringSecurityUtils;
 import com.only4play.system.domain.trade.order.OrderBase;
 import com.only4play.system.domain.trade.order.domainservice.model.OrderItemModel;
 import com.only4play.system.domain.trade.order.events.OrderEvents.OrderCancelEvent;
+import com.only4play.system.domain.trade.order.events.OrderEvents.OrderCompleteEvent;
 import com.only4play.system.domain.trade.order.events.OrderEvents.OrderCreateEvent;
 import com.only4play.system.domain.trade.order.mapper.OrderBaseMapper;
 import com.only4play.system.domain.trade.orderitem.creator.OrderItemCreator;
@@ -14,6 +16,7 @@ import com.only4play.system.domain.trade.orderlifecycle.service.IOrderLifecycleS
 import com.only4play.system.infrastructure.elastic.OrderDocument;
 import com.only4play.system.infrastructure.elastic.OrderDocumentRepository;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -43,7 +46,40 @@ public class OrderEventProcessor {
 
   @EventListener
   public void handleOrderCancelForEs(OrderCancelEvent orderCancelEvent){
+    OrderBase orderBase = orderCancelEvent.getOrderBase();
+    syncOrderDocument(orderBase);
+    writeLifecycle(orderBase.getFlowNo(), OrderOperateType.ORDER_CANCEL, "订单取消");
+  }
 
+  @EventListener
+  public void handleOrderComplete(OrderCompleteEvent completeEvent){
+    OrderBase orderBase = completeEvent.getOrderBase();
+    syncOrderDocument(orderBase);
+    writeLifecycle(orderBase.getFlowNo(), OrderOperateType.PAY_SUCCESS, "订单支付完成");
+  }
+
+  private void syncOrderDocument(OrderBase orderBase) {
+    Optional<OrderDocument> document = orderDocumentRepository.findById(
+        String.valueOf(orderBase.getFlowNo()));
+    if (!document.isPresent()) {
+      log.warn("ES 中没有订单文档, flowNo={}", orderBase.getFlowNo());
+      return;
+    }
+    OrderDocument orderDocument = document.get();
+    orderDocument.setOrderStatus(orderBase.getOrderState().getCode());
+    orderDocument.setOrderStatusTxt(orderBase.getOrderState().getName());
+    orderDocument.setPayTime(orderBase.getPayTime());
+    orderDocument.setPayList(orderBase.getPayList());
+    orderDocumentRepository.save(orderDocument);
+  }
+
+  private void writeLifecycle(Long flowNo, OrderOperateType operateType, String remark) {
+    OrderLifecycleCreator creator = new OrderLifecycleCreator();
+    creator.setFlowNo(flowNo);
+    creator.setOperateType(operateType);
+    creator.setOperateUser(SpringSecurityUtils.getCurrentUsername());
+    creator.setRemark(remark);
+    orderLifecycleService.createOrderLifecycle(creator);
   }
 
   @EventListener

@@ -15,7 +15,8 @@ public enum OrderOperateType implements BaseEnum<OrderOperateType> {
   AUTH_START(5,"鉴权请求开始"),
   AUTH_FAIL(6,"鉴权失败"),
   START_SUCCESS(7,"启动成功"),
-  START_FAIL(8,"启动失败")
+  START_FAIL(8,"启动失败"),
+  ORDER_CANCEL(9,"订单取消")
   ;
 
   OrderOperateType(Integer code, String name) {

@@ -18,6 +18,8 @@ import com.only4play.jpa.support.BaseJpaAggregate;
 import com.only4play.order.commons.pay.PayItem;
 import com.only4play.system.domain.trade.order.domainservice.model.OrderCompleteModel;
 import com.only4play.system.domain.trade.order.domainservice.model.OrderCreateModel;
+import com.only4play.system.domain.trade.order.events.OrderEvents.OrderCancelEvent;
+import com.only4play.system.domain.trade.order.events.OrderEvents.OrderCompleteEvent;
 import com.only4play.system.domain.trade.order.events.OrderEvents.OrderCreateEvent;
 import com.only4play.system.domain.user.AccountType;
 import com.only4play.system.domain.user.AccountTypeConverter;
@@ -164,6 +166,7 @@ public class OrderBase extends BaseJpaAggregate {
     payItemList.addAll(completeModel.getPayItemList());
     setPayList(payItemList);
     setOrderState(OrderState.PAY_SUCCESS);
+    registerEvent(new OrderCompleteEvent(this, completeModel));
   }
 
   /**
@@ -174,6 +177,7 @@ public class OrderBase extends BaseJpaAggregate {
       throw new BusinessException(OrderErrorCode.ORDER_NOT_WAIT_PAY);
     }
     setOrderState(OrderState.ABANDON);
+    registerEvent(new OrderCancelEvent(this));
   }
 
   public void valid() {
