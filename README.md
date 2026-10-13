@@ -44,7 +44,7 @@ mvn install -DskipTests -Plabs     # 连同练习工程
 
 ## 运行主应用
 
-默认 `local` profile：内存 H2，不连 Nacos、不连 ES，开箱即用。
+默认 `local` profile：内存 H2，不连 Nacos，连接本机 ES（`127.0.0.1:9200`，账号 `elastic` / `elastic`）。
 
 ```bash
 java -jar op-system-center/target/system-center.jar
@@ -55,7 +55,7 @@ java -jar op-system-center/target/system-center.jar
 - 预置管理员：`POST /auth/admin/pass`，body `{"username":"13800000000","password":"123456"}`，返回的 token 放到请求头 `token` 里
 - 分页接口的 `page` 从 1 开始
 
-`local` 下下单、开票等会同步写 ES 的链路会失败，要跑这些切到 `dev`。
+`local` 启动时会在 ES 里创建订单、回执、发票索引。本机没起 ES 时加 `ES_ENABLED=false`。要改用 MySQL，切到 `dev`。
 
 ### dev profile
 
