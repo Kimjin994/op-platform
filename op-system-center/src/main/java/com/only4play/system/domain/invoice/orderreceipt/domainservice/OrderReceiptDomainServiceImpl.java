@@ -12,6 +12,7 @@ import com.only4play.system.domain.invoice.orderreceipt.OrderReceipt;
 import com.only4play.order.commons.constants.BizEnum;
 import com.only4play.order.commons.filters.selector.FilterSelector;
 import com.only4play.order.commons.filters.selector.LocalListBasedFilterSelector;
+import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.exchange.CustomerModel;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.exchange.ExchangeConditionModel;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.exchange.ExchangeInvoiceModel;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.exchange.ExchangeInvoiceResultModel;
@@ -35,6 +36,8 @@ import com.only4play.system.domain.invoice.orderreceipt.ReceiptStatus;
 import com.only4play.system.infrastructure.constants.InvoiceErrorCode;
 import com.only4play.system.infrastructure.elastic.OrderReceiptDocument;
 import com.only4play.system.infrastructure.elastic.OrderReceiptDocumentRepository;
+import com.only4play.system.infrastructure.facade.IUserFacadeService;
+import org.apache.commons.lang3.StringUtils;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -56,6 +59,8 @@ public class OrderReceiptDomainServiceImpl implements IOrderReceiptDomainService
   private final ReceiptInvoiceRelRepository receiptInvoiceRelRepository;
 
   private final OrderReceiptDocumentRepository orderReceiptDocumentRepository;
+
+  private final IUserFacadeService userFacadeService;
 
 
   @Override
@@ -125,6 +130,16 @@ public class OrderReceiptDomainServiceImpl implements IOrderReceiptDomainService
     model.setInvoiceType(conditionModel.getInvoiceType());
     model.setCustomerModel(conditionModel.getCustomerModel());
     model.setPreview(conditionModel.isPreview());
+    userFacadeService.findUserByPhone(conditionModel.getPhone()).ifPresent(profile -> {
+      CustomerModel customer = model.getCustomerModel();
+      if (customer == null) {
+        customer = new CustomerModel();
+        model.setCustomerModel(customer);
+      }
+      if (StringUtils.isBlank(customer.getCustomerPhone())) {
+        customer.setCustomerPhone(profile.getPhone());
+      }
+    });
     return model;
   }
 
