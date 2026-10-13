@@ -11,6 +11,8 @@ import com.only4play.system.infrastructure.security.authentication.admin.passwor
 import com.only4play.system.infrastructure.security.authentication.admin.password.AdminPasswordLoginProcessFilter;
 import com.only4play.system.infrastructure.security.authentication.admin.sms.AdminSmsAuthenticationProvider;
 import com.only4play.system.infrastructure.security.authentication.admin.sms.AdminSmsLoginProcessFilter;
+import com.only4play.system.infrastructure.security.authentication.user.UserPasswordAuthenticationProvider;
+import com.only4play.system.infrastructure.security.authentication.user.UserPasswordLoginProcessFilter;
 import com.only4play.system.infrastructure.security.authorization.JsonAccessDeniedHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +57,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
   private AdminSmsAuthenticationProvider adminSmsAuthenticationProvider;
 
   @Autowired
+  private UserPasswordAuthenticationProvider userPasswordAuthenticationProvider;
+
+  @Autowired
   private CustomAuthenticationFailureHandler failureHandler;
 
   @Autowired
@@ -68,6 +73,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     auth.authenticationProvider(jwtAuthenticationProvider);
     auth.authenticationProvider(adminPasswordProvider);
     auth.authenticationProvider(adminSmsAuthenticationProvider);
+    auth.authenticationProvider(userPasswordAuthenticationProvider);
   }
 
   @Bean
@@ -86,6 +92,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
   public AdminSmsLoginProcessFilter smsFilter(){
     return new AdminSmsLoginProcessFilter(authenticationManager, failureHandler, successHandler);
+  }
+
+  public UserPasswordLoginProcessFilter userPassFilter() {
+    return new UserPasswordLoginProcessFilter(authenticationManager, failureHandler, successHandler);
   }
 
   @Override
@@ -146,6 +156,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     httpSecurity
         .addFilterBefore(adminPassFilter(), UsernamePasswordAuthenticationFilter.class)
         .addFilterBefore(smsFilter(), UsernamePasswordAuthenticationFilter.class)
+        .addFilterBefore(userPassFilter(), UsernamePasswordAuthenticationFilter.class)
         .addFilterBefore(authenticationTokenFilterBean(),
             UsernamePasswordAuthenticationFilter.class);
 

@@ -7,7 +7,8 @@ package com.only4play.system.infrastructure.security;
 public enum AuthUrlEnum {
 
   ADMIN_PASS("/auth/admin/pass", "后台用户密码登录"),
-  ADMIN_SMS("/auth/admin/sms", "后台用户短信验证码登录");
+  ADMIN_SMS("/auth/admin/sms", "后台用户短信验证码登录"),
+  USER_PASS("/auth/user/pass", "前台用户密码登录")
   ;
 
   AuthUrlEnum(String url, String name) {

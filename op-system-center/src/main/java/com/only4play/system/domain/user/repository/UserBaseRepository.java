@@ -4,6 +4,9 @@ package com.only4play.system.domain.user.repository;
 import com.only4play.jpa.support.BaseRepository;
 import com.only4play.system.domain.user.UserBase;
 import java.lang.Long;
+import java.util.Optional;
 
 public interface UserBaseRepository extends BaseRepository<UserBase, Long> {
+
+  Optional<UserBase> findByPhone(String phone);
 }

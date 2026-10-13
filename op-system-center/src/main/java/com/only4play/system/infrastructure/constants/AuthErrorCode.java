@@ -16,7 +16,8 @@ public enum AuthErrorCode implements BaseEnum<AuthErrorCode> {
    */
   VERIFY_CODE_INCORRECT(1501001, "验证码错误"),
   ROLE_ID_NULL(1501002, "角色Id为空"),
-  USER_ID_NULL(1501003, "用户Id为空")
+  USER_ID_NULL(1501003, "用户Id为空"),
+  PHONE_EXIST(1501004, "手机号已注册")
   ;
 
   AuthErrorCode(Integer code, String name) {
