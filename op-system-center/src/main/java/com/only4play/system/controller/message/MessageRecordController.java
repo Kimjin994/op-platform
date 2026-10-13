@@ -6,9 +6,11 @@ import com.only4play.common.model.JsonObject;
 import com.only4play.common.model.PageRequestWrapper;
 import com.only4play.common.model.PageResult;
 import com.only4play.system.domain.message.messagerecord.creator.MessageRecordCreator;
+import com.only4play.system.domain.message.messagerecord.domainservice.IMessageRecordDomainService;
 import com.only4play.system.domain.message.messagerecord.mapper.MessageRecordMapper;
 import com.only4play.system.domain.message.messagerecord.query.MessageRecordQuery;
 import com.only4play.system.domain.message.messagerecord.request.MessageRecordCreateRequest;
+import com.only4play.system.domain.message.messagerecord.request.MessageSendRequest;
 import com.only4play.system.domain.message.messagerecord.request.MessageRecordQueryRequest;
 import com.only4play.system.domain.message.messagerecord.request.MessageRecordUpdateRequest;
 import com.only4play.system.domain.message.messagerecord.response.MessageRecordResponse;
@@ -34,6 +36,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class MessageRecordController {
   private final IMessageRecordService messageRecordService;
+
+  private final IMessageRecordDomainService messageRecordDomainService;
+
+  /**
+   * 按模板渲染并发送消息
+   */
+  @PostMapping("send")
+  public JsonObject<String> send(@RequestBody MessageSendRequest request) {
+    messageRecordDomainService.sendMessage(MessageRecordMapper.INSTANCE.request2SendModel(request));
+    return JsonObject.success(CodeEnum.Success.getName());
+  }
 
   /**
    * createRequest

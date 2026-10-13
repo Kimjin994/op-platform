@@ -8,6 +8,7 @@ import com.only4play.system.domain.message.messagerecord.creator.MessageRecordCr
 import com.only4play.system.domain.message.messagerecord.domainservice.model.MessageSendModel;
 import com.only4play.system.domain.message.messagerecord.query.MessageRecordQuery;
 import com.only4play.system.domain.message.messagerecord.request.MessageRecordCreateRequest;
+import com.only4play.system.domain.message.messagerecord.request.MessageSendRequest;
 import com.only4play.system.domain.message.messagerecord.request.MessageRecordQueryRequest;
 import com.only4play.system.domain.message.messagerecord.request.MessageRecordUpdateRequest;
 import com.only4play.system.domain.message.messagerecord.response.MessageRecordResponse;
@@ -38,6 +39,8 @@ public interface MessageRecordMapper {
   MessageRecordResponse vo2Response(MessageRecordVO vo);
 
   MessageRecord model2Entity(MessageSendModel sendModel);
+
+  MessageSendModel request2SendModel(MessageSendRequest request);
 
   default MessageRecordResponse vo2CustomResponse(MessageRecordVO vo) {
     MessageRecordResponse response = vo2Response(vo);
