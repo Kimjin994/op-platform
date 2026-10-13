@@ -129,19 +129,22 @@ public class InvoiceEventProcessor {
   }
 
   /**
-   * 通过mq 调用金税系统
+   * 金税开票。待接入金税服务商。
+   * 接入顺序：投递开票请求或直接调金税接口，结果回调 POST invoice/invoice/v1/result。
+   * 接入前用人工确认接口推进，本方法不调用外部系统。
    */
   @EventListener
   public void handleRemoteInvoke(InvoiceCreateEvent event){
-      //
+    log.warn("金税未接入，applyFlowNo={}", event.getInvoice().getApplyFlowNo());
   }
 
   /**
-   * 如果是专票  集成工作流
+   * 专票审批。待接入 Flowable 或钉钉审批。
+   * 接入顺序：专票先发起审批，通过后再调金税；驳回时把凭据退回未开票。本期不发起审批。
    */
   @EventListener
   public void handleForWorkFlow(InvoiceCreateEvent event){
-
+    log.warn("专票审批未接入，applyFlowNo={}", event.getInvoice().getApplyFlowNo());
   }
 
 }

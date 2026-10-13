@@ -50,13 +50,19 @@ public class MessageRecord extends BaseJpaAggregate {
   @IgnoreCreator
   private ValidStatus validStatus;
 
+  @FieldDesc(name = "发送状态")
+  @Convert(converter = SendStatusConverter.class)
+  @IgnoreUpdater
+  @IgnoreCreator
+  private SendStatus sendStatus;
+
   /**
-   * 初始化发送事件
-   * @param content
+   * 初始化发送事件。本期外部通道未接入，状态固定为未接入。
    */
   public void init(String content) {
     setContent(content);
     setValidStatus(ValidStatus.VALID);
+    setSendStatus(SendStatus.NOT_CONNECTED);
     registerEvent(new MessageRecordCreateEvent(this));
   }
 

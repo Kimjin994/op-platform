@@ -76,23 +76,23 @@ public class MessageRecordEventProcessor {
     }
   }
 
-  /***
-   * 处理钉钉消息  这里根据实际情况可以选择异步
-   * @param createEvent
+  /**
+   * 钉钉通知。待接入钉钉自定义机器人：按模板或参数找到 DingRobot，用 tokenUrl 调 webhook，并加签、失败重试。
+   * 接入后把 sendStatus 改为已发送或失败。本期不调用外部接口。
    */
   @EventListener
   public void handleMessageForDing(MessageRecordCreateEvent createEvent){
     NoticeType noticeType = createEvent.getMessageRecord().getNoticeType();
     MsgTypeEnum msgType = createEvent.getMessageRecord().getMsgType();
-    //是通知的话进行处理
     if(Objects.equals(NoticeType.DING_DING,noticeType) && Objects.equals(MsgTypeEnum.NOTICE,msgType)){
-
+      log.warn("钉钉消息未接入，recordId={}", createEvent.getMessageRecord().getId());
     }
   }
 
   /**
-   * 处理短信消息
-   * @param createEvent
+   * 短信通知。待接入短信平台（阿里云、腾讯云等）。
+   * 接入顺序：补齐 SmsSendModel 的手机号、签名、模板编号和参数，调用 ISmsSendService（新平台加一个 @Extension 实现即可），再按结果回写 sendStatus。
+   * 本期扩展点仍会执行，但实现只记录未接入。
    */
   @EventListener
   public void handleMessageForSms(MessageRecordCreateEvent createEvent){
@@ -100,21 +100,24 @@ public class MessageRecordEventProcessor {
     MsgTypeEnum msgType = createEvent.getMessageRecord().getMsgType();
     if(Objects.equals(NoticeType.SMS,noticeType) && Objects.equals(MsgTypeEnum.NOTICE,msgType)){
       MessageRecord messageRecord = createEvent.getMessageRecord();
+      log.warn("短信未接入，recordId={}", messageRecord.getId());
       SmsSendModel ssm = new SmsSendModel();
-      //设置参数
-      Boolean sendResult = serviceExecutor.execute(ISmsSendService.class, SmsBiz.ALI, f -> {
+      serviceExecutor.execute(ISmsSendService.class, SmsBiz.ALI, f -> {
         return f.sendSms(ssm);
       });
     }
   }
 
   /**
-   * 处理邮件消息
-   * @param createEvent
+   * 邮件通知。待接入 SMTP（spring-boot-starter-mail）。
+   * 接入顺序：渲染正文后发送，失败重试，回写 sendStatus。本期不发送。
    */
   @EventListener
   public void handleMessageForEmail(MessageRecordCreateEvent createEvent){
-
+    NoticeType noticeType = createEvent.getMessageRecord().getNoticeType();
+    if (Objects.equals(NoticeType.EMAIL, noticeType)) {
+      log.warn("邮件未接入，recordId={}", createEvent.getMessageRecord().getId());
+    }
   }
 
 
