@@ -83,3 +83,13 @@ java -jar op-system-center/target/system-center.jar --spring.profiles.active=dev
 - 配置原本放在 Nacos 上，拆成 `application.yml` + `application-local.yml` + `application-dev.yml`。
 - 测试代码挪到标准的 `src/test/java`。
 - 练习工程里的 `op-code-generator/op-codegen-apt` 改名为 `op-codegen-apt-v2`，避免和框架层坐标冲突。
+
+## 接口权限码
+
+业务接口使用 `@PreAuthorize("@perm.has('模块:资源:操作')")`。登录、`/public/**`、`/auth/**`、Swagger 和健康检查不校验功能权限。
+
+角色编码 `ADMIN` 会得到 `ROLE_ADMIN`，接口校验直接通过。`local` 预置管理员 `13800000000` 在 `db/local-data.sql` 里绑定该角色。
+
+完整权限码写在同一份 SQL 的 `resource.code` 中。操作名包括 `create`、`update`、`valid`、`invalid`、`view`、`list`，以及 `complete`、`cancel`、`revise`、`exchange`、`abandon`、`confirm`、`in`、`out`、`transfer`、`grant`、`gen`、`mock`、`verify`、`send`。
+
+令牌有效期为 `jwt.expireMinutes`，默认 120 分钟。
