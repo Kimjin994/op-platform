@@ -9,6 +9,7 @@ import com.only4play.common.model.PageResult;
 import com.only4play.system.domain.user.creator.UserAccountCreator;
 import com.only4play.system.domain.user.mapper.UserAccountMapper;
 import com.only4play.system.domain.user.query.UserAccountQuery;
+import com.only4play.system.domain.user.request.ChangePasswordRequest;
 import com.only4play.system.domain.user.request.UserAccountCreateRequest;
 import com.only4play.system.domain.user.request.UserAccountQueryRequest;
 import com.only4play.system.domain.user.request.UserAccountUpdateRequest;
@@ -54,6 +55,16 @@ public class UserAccountController {
   public JsonObject<String> updateUserAccount(@RequestBody UserAccountUpdateRequest request) {
     UserAccountUpdater updater = UserAccountMapper.INSTANCE.request2Updater(request);
     userAccountService.updateUserAccount(updater);
+    return JsonObject.success(CodeEnum.Success.getName());
+  }
+
+  /**
+   * 校验旧密码后修改密码。更新接口不再改密码。
+   */
+  @PreAuthorize("@perm.has('user:account:password')")
+  @PostMapping("changePassword")
+  public JsonObject<String> changePassword(@RequestBody ChangePasswordRequest request) {
+    userAccountService.changePassword(request.getId(), request.getOldPassword(), request.getNewPassword());
     return JsonObject.success(CodeEnum.Success.getName());
   }
 

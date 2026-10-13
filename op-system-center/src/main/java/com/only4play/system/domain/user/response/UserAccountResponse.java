@@ -21,11 +21,6 @@ public class UserAccountResponse extends AbstractJpaResponse {
   private String accountNo;
 
   @Schema(
-      title = "密码"
-  )
-  private String password;
-
-  @Schema(
       title = "账号类型"
   )
   private AccountType accountType;
@@ -49,14 +44,6 @@ public class UserAccountResponse extends AbstractJpaResponse {
 
   public void setAccountNo(String accountNo) {
     this.accountNo = accountNo;
-  }
-
-  public String getPassword() {
-    return password;
-  }
-
-  public void setPassword(String password) {
-    this.password = password;
   }
 
   public AccountType getAccountType() {

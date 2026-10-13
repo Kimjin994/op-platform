@@ -25,6 +25,7 @@ import com.querydsl.core.BooleanBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -69,6 +70,9 @@ public class AdminUserServiceImpl implements IAdminUserService {
    */
   @Override
   public void updateAdminUser(AdminUserUpdater updater) {
+    if (StringUtils.isNotBlank(updater.getPassword()) && !updater.getPassword().startsWith("$2")) {
+      updater.setPassword(new BCryptPasswordEncoder().encode(updater.getPassword()));
+    }
     EntityOperations.doUpdate(adminUserRepository)
     .loadById(updater.getId())
     .update(e -> updater.updateAdminUser(e))

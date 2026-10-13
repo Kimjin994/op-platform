@@ -398,3 +398,6 @@ INSERT INTO resource (created_at, updated_at, version, name, code, valid_status)
 VALUES (1700000000000, 1700000000000, 0, 'user:base:valid', 'user:base:valid', 1);
 INSERT INTO resource (created_at, updated_at, version, name, code, valid_status)
 VALUES (1700000000000, 1700000000000, 0, 'user:base:view', 'user:base:view', 1);
+
+INSERT INTO resource (created_at, updated_at, version, name, code, valid_status)
+VALUES (1700000000000, 1700000000000, 0, 'user:account:password', 'user:account:password', 1);

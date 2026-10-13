@@ -21,6 +21,11 @@ public interface IUserAccountService {
   void updateUserAccount(UserAccountUpdater updater);
 
   /**
+   * 校验旧密码后修改密码
+   */
+  void changePassword(Long id, String oldPassword, String newPassword);
+
+  /**
    * valid
    */
   void validUserAccount(Long id);

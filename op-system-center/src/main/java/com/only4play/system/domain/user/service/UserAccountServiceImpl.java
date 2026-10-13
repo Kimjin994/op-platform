@@ -19,10 +19,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +40,9 @@ public class UserAccountServiceImpl implements IUserAccountService {
    */
   @Override
   public Long createUserAccount(UserAccountCreator creator) {
+    if (StringUtils.isNotBlank(creator.getPassword())) {
+      creator.setPassword(new BCryptPasswordEncoder().encode(creator.getPassword()));
+    }
     Optional<UserAccount> userAccount = EntityOperations.doCreate(userAccountRepository)
     .create(() -> UserAccountMapper.INSTANCE.dtoToEntity(creator))
     .update(e -> e.init())
@@ -50,10 +55,23 @@ public class UserAccountServiceImpl implements IUserAccountService {
    */
   @Override
   public void updateUserAccount(UserAccountUpdater updater) {
+    updater.setPassword(null);
     EntityOperations.doUpdate(userAccountRepository)
     .loadById(updater.getId())
     .update(e -> updater.updateUserAccount(e))
     .execute();
+  }
+
+  @Override
+  public void changePassword(Long id, String oldPassword, String newPassword) {
+    UserAccount account = userAccountRepository.findById(id)
+        .orElseThrow(() -> new BusinessException(CodeEnum.NotFindError));
+    BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    if (!encoder.matches(oldPassword, account.getPassword())) {
+      throw new BusinessException(CodeEnum.ParamSetIllegal);
+    }
+    account.setPassword(encoder.encode(newPassword));
+    userAccountRepository.save(account);
   }
 
   /**
