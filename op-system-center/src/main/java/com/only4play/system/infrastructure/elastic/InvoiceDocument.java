@@ -101,6 +101,18 @@ public class InvoiceDocument {
 
   private Integer validStatus;
 
+  private Integer invoiceStatus;
+
+  private String invoiceNo;
+
+  private String invoiceCode;
+
+  private Long makeTime;
+
+  private String failReason;
+
+  private String applyFlowNo;
+
   @FieldDesc(name = "开票时传递的属性信息")
   @Field(type = FieldType.Nested)
   private List<CodeValue> extAttrs;

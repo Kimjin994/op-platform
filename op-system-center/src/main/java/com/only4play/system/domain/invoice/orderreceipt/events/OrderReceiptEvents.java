@@ -23,4 +23,10 @@ public interface OrderReceiptEvents {
     private OrderReceipt orderReceipt;
   }
 
+  @Value
+  class ReceiptStatusChangedEvent {
+
+    private OrderReceipt orderReceipt;
+  }
+
 }

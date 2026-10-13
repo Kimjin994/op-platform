@@ -12,6 +12,8 @@ import com.only4play.common.constants.ValidStatus;
 import com.only4play.jpa.converter.ValidStatusConverter;
 import com.only4play.jpa.support.BaseJpaAggregate;
 import com.only4play.system.domain.invoice.invoice.events.InvoiceEvents.InvoiceCreateEvent;
+import com.only4play.system.domain.invoice.invoice.events.InvoiceEvents.InvoiceFailEvent;
+import com.only4play.system.domain.invoice.invoice.events.InvoiceEvents.InvoiceSuccessEvent;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.InvoiceType;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.exchange.ExchangeInvoiceModel;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.exchange.InvoiceModel;
@@ -19,6 +21,7 @@ import com.only4play.system.infrastructure.converter.CodeValueListConverter;
 import com.only4play.system.infrastructure.model.CodeValue;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -59,6 +62,24 @@ public class Invoice extends BaseJpaAggregate {
 
   @FieldDesc(name = "金税申请流水")
   private String applyFlowNo;
+
+  @FieldDesc(name = "开票状态")
+  @Convert(converter = InvoiceStatusConverter.class)
+  @IgnoreUpdater
+  @IgnoreCreator
+  private InvoiceStatus invoiceStatus;
+
+  @FieldDesc(name = "发票号码")
+  private String invoiceNo;
+
+  @FieldDesc(name = "发票代码")
+  private String invoiceCode;
+
+  @FieldDesc(name = "开票时间")
+  private Long makeTime;
+
+  @FieldDesc(name = "失败原因")
+  private String failReason;
 
   /**
    * 销方开票主体
@@ -166,8 +187,39 @@ public class Invoice extends BaseJpaAggregate {
     setReviewer(invoiceModel.getOperateUserModel().getReviewer());
     setTaxCode(invoiceModel.getReceiptDocuments().get(0).getTaxCode());
     setExtAttrs(exchangeInvoiceModel.getExtAttrs());
+    setInvoiceStatus(InvoiceStatus.MAKING);
 
     registerEvent(new InvoiceCreateEvent(this, exchangeInvoiceModel, invoiceModel));
+  }
+
+  /**
+   * 已是终态时不再处理，保证重复确认幂等。
+   */
+  public boolean complete(String invoiceNo, String invoiceCode, Long makeTime) {
+    if (isTerminal()) {
+      return false;
+    }
+    setInvoiceStatus(InvoiceStatus.SUCCESS);
+    setInvoiceNo(invoiceNo);
+    setInvoiceCode(invoiceCode);
+    setMakeTime(makeTime);
+    registerEvent(new InvoiceSuccessEvent(this));
+    return true;
+  }
+
+  public boolean fail(String reason) {
+    if (isTerminal()) {
+      return false;
+    }
+    setInvoiceStatus(InvoiceStatus.FAIL);
+    setFailReason(reason);
+    registerEvent(new InvoiceFailEvent(this));
+    return true;
+  }
+
+  public boolean isTerminal() {
+    return Objects.equals(InvoiceStatus.SUCCESS, invoiceStatus)
+        || Objects.equals(InvoiceStatus.FAIL, invoiceStatus);
   }
 
 

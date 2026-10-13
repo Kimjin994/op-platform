@@ -15,6 +15,7 @@ import com.only4play.system.domain.invoice.invoice.vo.InvoiceVO;
 import com.only4play.system.infrastructure.converter.CustomMapper;
 import com.only4play.system.infrastructure.elastic.InvoiceDocument;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 @Mapper(
@@ -37,6 +38,7 @@ public interface InvoiceMapper {
 
   InvoiceResponse vo2Response(InvoiceVO vo);
 
+  @Mapping(target = "invoiceStatus", ignore = true)
   InvoiceDocument entity2Document(Invoice invoice);
 
   default InvoiceResponse vo2CustomResponse(InvoiceVO vo) {

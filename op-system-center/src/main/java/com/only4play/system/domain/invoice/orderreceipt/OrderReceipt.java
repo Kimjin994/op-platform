@@ -18,6 +18,7 @@ import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.regi
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.register.OrderRegisterResultModel;
 import com.only4play.system.domain.invoice.orderreceipt.events.OrderReceiptEvents.OrderRegisterEvent;
 import com.only4play.system.domain.invoice.orderreceipt.events.OrderReceiptEvents.ReceiptAbandonEvent;
+import com.only4play.system.domain.invoice.orderreceipt.events.OrderReceiptEvents.ReceiptStatusChangedEvent;
 import com.only4play.system.infrastructure.constants.InvoiceErrorCode;
 import com.only4play.system.infrastructure.converter.CodeValueListConverter;
 import com.only4play.system.infrastructure.converter.PayItemListConverter;
@@ -141,6 +142,22 @@ public class OrderReceipt extends BaseJpaAggregate {
     }
     setReceiptStatus(ReceiptStatus.ABANDON);
     registerEvent(new ReceiptAbandonEvent(this));
+  }
+
+  public void completeInvoice() {
+    if (!Objects.equals(ReceiptStatus.MAKING, getReceiptStatus())) {
+      return;
+    }
+    setReceiptStatus(ReceiptStatus.COMPLETE);
+    registerEvent(new ReceiptStatusChangedEvent(this));
+  }
+
+  public void rollbackToUnmaking() {
+    if (!Objects.equals(ReceiptStatus.MAKING, getReceiptStatus())) {
+      return;
+    }
+    setReceiptStatus(ReceiptStatus.UNMAKING);
+    registerEvent(new ReceiptStatusChangedEvent(this));
   }
 
 

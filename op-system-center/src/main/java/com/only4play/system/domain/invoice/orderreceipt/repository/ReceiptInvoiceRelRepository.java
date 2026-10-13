@@ -4,6 +4,9 @@ package com.only4play.system.domain.invoice.orderreceipt.repository;
 import com.only4play.jpa.support.BaseRepository;
 import com.only4play.system.domain.invoice.orderreceipt.ReceiptInvoiceRel;
 import java.lang.Long;
+import java.util.List;
 
 public interface ReceiptInvoiceRelRepository extends BaseRepository<ReceiptInvoiceRel, Long> {
+
+  List<ReceiptInvoiceRel> findByInvoiceId(Long invoiceId);
 }

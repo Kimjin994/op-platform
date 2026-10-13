@@ -16,4 +16,16 @@ public interface InvoiceEvents {
 
   }
 
+  @Value
+  class InvoiceSuccessEvent {
+
+    private Invoice invoice;
+  }
+
+  @Value
+  class InvoiceFailEvent {
+
+    private Invoice invoice;
+  }
+
 }

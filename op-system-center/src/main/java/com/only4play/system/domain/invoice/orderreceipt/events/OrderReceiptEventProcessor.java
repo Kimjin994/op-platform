@@ -5,6 +5,7 @@ import com.only4play.system.domain.invoice.orderreceipt.creator.ReceiptItemCreat
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.register.OrderRegisterResultModel.ReceiptItemModel;
 import com.only4play.system.domain.invoice.orderreceipt.events.OrderReceiptEvents.OrderRegisterEvent;
 import com.only4play.system.domain.invoice.orderreceipt.events.OrderReceiptEvents.ReceiptAbandonEvent;
+import com.only4play.system.domain.invoice.orderreceipt.events.OrderReceiptEvents.ReceiptStatusChangedEvent;
 import com.only4play.system.domain.invoice.orderreceipt.mapper.OrderReceiptMapper;
 import com.only4play.system.domain.invoice.orderreceipt.mapper.ReceiptItemMapper;
 import com.only4play.system.domain.invoice.orderreceipt.service.IReceiptItemService;
@@ -64,6 +65,23 @@ public class OrderReceiptEventProcessor {
   @EventListener
   public void handleReceiptAbandon(ReceiptAbandonEvent event) {
     OrderReceipt orderReceipt = event.getOrderReceipt();
+    Optional<OrderReceiptDocument> document = orderReceiptDocumentRepository.findById(
+        String.valueOf(orderReceipt.getRegisterFlowNo()));
+    if (!document.isPresent()) {
+      log.warn("ES 中没有凭据文档, registerFlowNo={}", orderReceipt.getRegisterFlowNo());
+      return;
+    }
+    OrderReceiptDocument receiptDocument = document.get();
+    receiptDocument.setReceiptStatus(orderReceipt.getReceiptStatus().getCode());
+    orderReceiptDocumentRepository.save(receiptDocument);
+  }
+
+  @EventListener
+  public void handleReceiptStatusChanged(ReceiptStatusChangedEvent event) {
+    syncReceiptStatus(event.getOrderReceipt());
+  }
+
+  private void syncReceiptStatus(OrderReceipt orderReceipt) {
     Optional<OrderReceiptDocument> document = orderReceiptDocumentRepository.findById(
         String.valueOf(orderReceipt.getRegisterFlowNo()));
     if (!document.isPresent()) {

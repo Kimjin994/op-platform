@@ -3,6 +3,7 @@ package com.only4play.system.domain.invoice.orderreceipt.domainservice;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.exchange.ExchangeConditionModel;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.exchange.ExchangeInvoiceModel;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.exchange.ExchangeInvoiceResultModel;
+import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.exchange.InvoiceResultModel;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.register.OrderRegisterModel;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.register.OrderRegisterResultModel;
 import java.util.List;
@@ -33,8 +34,8 @@ public interface IOrderReceiptDomainService {
   ExchangeInvoiceResultModel exchangeInvoiceByCondition(ExchangeConditionModel conditionModel);
 
   /**
-   * 开票完成
+   * 按发票确认开票结果。成功的凭据改为已完成，失败的凭据退回未开票。
    */
-  void completeInvoice(List<Long> ids);
+  void confirmInvoices(List<InvoiceResultModel> results);
 
 }

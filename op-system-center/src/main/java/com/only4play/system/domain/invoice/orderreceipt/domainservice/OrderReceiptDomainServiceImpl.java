@@ -1,6 +1,12 @@
 package com.only4play.system.domain.invoice.orderreceipt.domainservice;
 
 import cn.hutool.core.lang.Assert;
+import com.only4play.common.constants.CodeEnum;
+import com.only4play.common.exception.BusinessException;
+import com.only4play.system.domain.invoice.invoice.Invoice;
+import com.only4play.system.domain.invoice.invoice.InvoiceStatus;
+import com.only4play.system.domain.invoice.invoice.repository.InvoiceRepository;
+import com.only4play.system.domain.invoice.orderreceipt.ReceiptInvoiceRel;
 import com.only4play.jpa.support.EntityOperations;
 import com.only4play.system.domain.invoice.orderreceipt.OrderReceipt;
 import com.only4play.order.commons.constants.BizEnum;
@@ -9,6 +15,7 @@ import com.only4play.order.commons.filters.selector.LocalListBasedFilterSelector
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.exchange.ExchangeConditionModel;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.exchange.ExchangeInvoiceModel;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.exchange.ExchangeInvoiceResultModel;
+import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.exchange.InvoiceResultModel;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.register.OrderRegisterModel;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.register.OrderRegisterResultModel;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.pipeline.FilterChainPipeline;
@@ -23,7 +30,9 @@ import com.only4play.system.domain.invoice.orderreceipt.domainservice.pipeline.f
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.pipeline.filters.register.PopulateReceiptItemFilter;
 import com.only4play.system.domain.invoice.orderreceipt.domainservice.pipeline.filters.register.SaveRegisterLogFilter;
 import com.only4play.system.domain.invoice.orderreceipt.repository.OrderReceiptRepository;
+import com.only4play.system.domain.invoice.orderreceipt.repository.ReceiptInvoiceRelRepository;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +45,10 @@ public class OrderReceiptDomainServiceImpl implements IOrderReceiptDomainService
   private final FilterChainPipeline exchangeInvoicePipeline;
 
   private final OrderReceiptRepository orderReceiptRepository;
+
+  private final InvoiceRepository invoiceRepository;
+
+  private final ReceiptInvoiceRelRepository receiptInvoiceRelRepository;
 
 
   @Override
@@ -89,8 +102,55 @@ public class OrderReceiptDomainServiceImpl implements IOrderReceiptDomainService
   }
 
   @Override
-  public void completeInvoice(List<Long> ids) {
+  public void confirmInvoices(List<InvoiceResultModel> results) {
+    Assert.notEmpty(results);
+    for (InvoiceResultModel result : results) {
+      confirmOne(result);
+    }
+  }
 
+  private void confirmOne(InvoiceResultModel result) {
+    Assert.notBlank(result.getApplyFlowNo());
+    Invoice invoice = invoiceRepository.findByApplyFlowNo(result.getApplyFlowNo())
+        .orElseThrow(() -> new BusinessException(CodeEnum.NotFindError));
+    if (invoice.isTerminal()) {
+      return;
+    }
+    if (result.isSuccess()) {
+      EntityOperations.doUpdate(invoiceRepository)
+          .load(() -> invoice)
+          .update(e -> {
+            e.complete(result.getInvoiceNo(), result.getInvoiceCode(), result.getMakeTime());
+          })
+          .execute();
+      if (Objects.equals(InvoiceStatus.SUCCESS, invoice.getInvoiceStatus())) {
+        updateRelatedReceipts(invoice.getId(), true);
+      }
+      return;
+    }
+    EntityOperations.doUpdate(invoiceRepository)
+        .load(() -> invoice)
+        .update(e -> {
+          e.fail(result.getFailReason());
+        })
+        .execute();
+    if (Objects.equals(InvoiceStatus.FAIL, invoice.getInvoiceStatus())) {
+      updateRelatedReceipts(invoice.getId(), false);
+    }
+  }
+
+  private void updateRelatedReceipts(Long invoiceId, boolean success) {
+    List<ReceiptInvoiceRel> rels = receiptInvoiceRelRepository.findByInvoiceId(invoiceId);
+    for (ReceiptInvoiceRel rel : rels) {
+      if (rel.getRegisterFlowNo() == null) {
+        continue;
+      }
+      orderReceiptRepository.findByRegisterFlowNo(Long.valueOf(rel.getRegisterFlowNo()))
+          .ifPresent(receipt -> EntityOperations.doUpdate(orderReceiptRepository)
+              .load(() -> receipt)
+              .update(success ? OrderReceipt::completeInvoice : OrderReceipt::rollbackToUnmaking)
+              .execute());
+    }
   }
 
 

@@ -1,8 +1,12 @@
 package com.only4play.system.domain.invoice.invoice.events;
 
 import com.google.common.collect.Lists;
+import com.only4play.system.domain.invoice.invoice.Invoice;
 import com.only4play.system.domain.invoice.invoice.InvoiceItem;
+import com.only4play.system.domain.invoice.invoice.InvoiceStatus;
 import com.only4play.system.domain.invoice.invoice.events.InvoiceEvents.InvoiceCreateEvent;
+import com.only4play.system.domain.invoice.invoice.events.InvoiceEvents.InvoiceFailEvent;
+import com.only4play.system.domain.invoice.invoice.events.InvoiceEvents.InvoiceSuccessEvent;
 import com.only4play.system.domain.invoice.invoice.mapper.InvoiceItemMapper;
 import com.only4play.system.domain.invoice.invoice.mapper.InvoiceMapper;
 import com.only4play.system.domain.invoice.invoice.repository.InvoiceItemRepository;
@@ -15,6 +19,7 @@ import com.only4play.system.infrastructure.elastic.OrderReceiptDocument;
 import com.only4play.system.infrastructure.elastic.ReceiptInvoiceRouterDocument;
 import com.only4play.system.infrastructure.elastic.ReceiptInvoiceRouterDocumentRepository;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +42,8 @@ public class InvoiceEventProcessor {
   @EventListener
   public void handleInvoiceForEs(InvoiceCreateEvent event){
     InvoiceDocument document = InvoiceMapper.INSTANCE.entity2Document(event.getInvoice());
+    document.setId(event.getInvoice().getApplyFlowNo());
+    document.setInvoiceStatus(InvoiceStatus.MAKING.getCode());
     document.setItemModels(event.getInvoiceModel().getItemList());
     invoiceDocumentRepository.save(document);
   }
@@ -88,9 +95,37 @@ public class InvoiceEventProcessor {
           rel.setBatchNo(event.getInvoice().getBatchNo());
           rel.setOrderFlowNo(ord.getOrderFlowNo());
           rel.setRegisterFlowNo(String.valueOf(ord.getRegisterFlowNo()));
+          rel.setInvoiceId(event.getInvoice().getId());
           return rel;
         }).collect(Collectors.toList());
     receiptInvoiceRelRepository.saveAll(rels);
+  }
+
+  @EventListener
+  public void handleInvoiceSuccess(InvoiceSuccessEvent event) {
+    syncInvoiceDocument(event.getInvoice());
+  }
+
+  @EventListener
+  public void handleInvoiceFail(InvoiceFailEvent event) {
+    syncInvoiceDocument(event.getInvoice());
+  }
+
+  private void syncInvoiceDocument(Invoice invoice) {
+    Optional<InvoiceDocument> document = invoiceDocumentRepository.findById(invoice.getApplyFlowNo());
+    if (!document.isPresent()) {
+      log.warn("ES 中没有发票文档, applyFlowNo={}", invoice.getApplyFlowNo());
+      return;
+    }
+    InvoiceDocument invoiceDocument = document.get();
+    if (invoice.getInvoiceStatus() != null) {
+      invoiceDocument.setInvoiceStatus(invoice.getInvoiceStatus().getCode());
+    }
+    invoiceDocument.setInvoiceNo(invoice.getInvoiceNo());
+    invoiceDocument.setInvoiceCode(invoice.getInvoiceCode());
+    invoiceDocument.setMakeTime(invoice.getMakeTime());
+    invoiceDocument.setFailReason(invoice.getFailReason());
+    invoiceDocumentRepository.save(invoiceDocument);
   }
 
   /**

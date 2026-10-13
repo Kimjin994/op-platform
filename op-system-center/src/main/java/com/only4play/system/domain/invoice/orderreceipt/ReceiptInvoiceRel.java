@@ -21,4 +21,7 @@ public class ReceiptInvoiceRel extends BaseJpaAggregate {
 
   @FieldDesc(name = "发票的批号")
   private String batchNo;
+
+  @FieldDesc(name = "发票ID")
+  private Long invoiceId;
 }

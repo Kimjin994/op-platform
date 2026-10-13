@@ -10,13 +10,17 @@ import com.only4play.system.domain.invoice.invoice.mapper.InvoiceMapper;
 import com.only4play.system.domain.invoice.invoice.query.InvoiceQuery;
 import com.only4play.system.domain.invoice.invoice.request.InvoiceCreateRequest;
 import com.only4play.system.domain.invoice.invoice.request.InvoiceQueryRequest;
+import com.only4play.system.domain.invoice.invoice.request.InvoiceResultRequest;
 import com.only4play.system.domain.invoice.invoice.request.InvoiceUpdateRequest;
 import com.only4play.system.domain.invoice.invoice.response.InvoiceResponse;
 import com.only4play.system.domain.invoice.invoice.service.IInvoiceService;
 import com.only4play.system.domain.invoice.invoice.updater.InvoiceUpdater;
 import com.only4play.system.domain.invoice.invoice.vo.InvoiceVO;
+import com.only4play.system.domain.invoice.orderreceipt.domainservice.IOrderReceiptDomainService;
+import com.only4play.system.domain.invoice.orderreceipt.domainservice.model.exchange.InvoiceResultModel;
 import java.lang.Long;
 import java.lang.String;
+import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +38,27 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class InvoiceController {
   private final IInvoiceService invoiceService;
+
+  private final IOrderReceiptDomainService orderReceiptDomainService;
+
+  /**
+   * 按发票确认开票结果，可一次传多张
+   */
+  @PostMapping("result")
+  public JsonObject<String> confirmResult(@RequestBody List<InvoiceResultRequest> requests) {
+    List<InvoiceResultModel> results = requests.stream().map(request -> {
+      InvoiceResultModel model = new InvoiceResultModel();
+      model.setApplyFlowNo(request.getApplyFlowNo());
+      model.setSuccess(request.isSuccess());
+      model.setInvoiceNo(request.getInvoiceNo());
+      model.setInvoiceCode(request.getInvoiceCode());
+      model.setMakeTime(request.getMakeTime());
+      model.setFailReason(request.getFailReason());
+      return model;
+    }).collect(Collectors.toList());
+    orderReceiptDomainService.confirmInvoices(results);
+    return JsonObject.success(CodeEnum.Success.getName());
+  }
 
   /**
    * createRequest

@@ -4,6 +4,10 @@ package com.only4play.system.domain.invoice.invoice.repository;
 import com.only4play.jpa.support.BaseRepository;
 import com.only4play.system.domain.invoice.invoice.Invoice;
 import java.lang.Long;
+import java.util.List;
+import java.util.Optional;
 
 public interface InvoiceRepository extends BaseRepository<Invoice, Long> {
+
+  Optional<Invoice> findByApplyFlowNo(String applyFlowNo);
 }
