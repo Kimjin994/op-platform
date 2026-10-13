@@ -18,6 +18,7 @@ import com.only4play.system.domain.permission.role.repository.RoleResourceRelRep
 import com.only4play.system.domain.permission.role.updater.RoleUpdater;
 import com.only4play.system.domain.permission.role.vo.RoleVO;
 import com.only4play.system.infrastructure.constants.AuthErrorCode;
+import com.only4play.system.infrastructure.security.authorization.AdminPermissionLoader;
 import com.querydsl.core.BooleanBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +44,8 @@ public class RoleServiceImpl implements IRoleService {
   private final RoleRepository roleRepository;
 
   private final RoleResourceRelRepository roleResourceRelRepository;
+
+  private final AdminPermissionLoader adminPermissionLoader;
 
   /**
    * createImpl
@@ -145,6 +148,7 @@ public class RoleServiceImpl implements IRoleService {
       // 将新授权的id保存
       roleResourceRelRepository.saveAll(collect);
     }
+    adminPermissionLoader.evictByRole(roleId);
   }
 
   @Override

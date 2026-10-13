@@ -10,4 +10,9 @@ import org.springframework.stereotype.Component;
 public class SecurityProperties {
 
   private String secret;
+
+  /**
+   * token 有效分钟数
+   */
+  private Integer expireMinutes = 120;
 }

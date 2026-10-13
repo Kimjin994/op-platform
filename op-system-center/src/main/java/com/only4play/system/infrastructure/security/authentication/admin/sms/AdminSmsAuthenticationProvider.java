@@ -1,6 +1,5 @@
 package com.only4play.system.infrastructure.security.authentication.admin.sms;
 
-import cn.hutool.jwt.JWTUtil;
 import com.google.common.collect.Maps;
 import com.only4play.security.base.BaseAuthenticationProvider;
 import com.only4play.security.base.LoginSuccessToken;
@@ -13,8 +12,8 @@ import com.only4play.system.infrastructure.config.MessageProperties;
 import com.only4play.system.infrastructure.config.SecurityProperties;
 import com.only4play.system.infrastructure.constants.AuthConstants;
 import com.only4play.system.infrastructure.constants.AuthErrorCode;
+import com.only4play.system.infrastructure.security.JwtTokens;
 import com.only4play.system.infrastructure.security.LoginUserType;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -56,7 +55,8 @@ public class AdminSmsAuthenticationProvider extends BaseAuthenticationProvider i
         Map<String,Object> jwtInfo = Maps.newHashMap();
         jwtInfo.put(AuthConstants.ID,adminUser.get().getId());
         jwtInfo.put(AuthConstants.LOGIN_USER_TYPE, LoginUserType.ADMIN_USER.getCode());
-        String jwtToken = JWTUtil.createToken(jwtInfo, securityProperties.getSecret().getBytes(StandardCharsets.UTF_8));
+        String jwtToken = JwtTokens.sign(jwtInfo, securityProperties.getSecret(),
+            securityProperties.getExpireMinutes());
         return new LoginSuccessToken(jwtToken, adminUser.get().getUsername());
       }else {
         throw new CustomAuthenticationException(AuthErrorCode.VERIFY_CODE_INCORRECT.getCode(),AuthErrorCode.VERIFY_CODE_INCORRECT.getName());

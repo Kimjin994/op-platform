@@ -11,4 +11,9 @@ public interface AuthConstants {
   String ID = "id";
 
   String LOGIN_USER_TYPE = "login_type";
+
+  /**
+   * 角色编码。拥有该角色的管理员跳过接口权限校验。
+   */
+  String SUPER_ADMIN_ROLE = "ADMIN";
 }

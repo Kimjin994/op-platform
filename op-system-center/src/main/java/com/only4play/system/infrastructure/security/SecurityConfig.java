@@ -11,6 +11,7 @@ import com.only4play.system.infrastructure.security.authentication.admin.passwor
 import com.only4play.system.infrastructure.security.authentication.admin.password.AdminPasswordLoginProcessFilter;
 import com.only4play.system.infrastructure.security.authentication.admin.sms.AdminSmsAuthenticationProvider;
 import com.only4play.system.infrastructure.security.authentication.admin.sms.AdminSmsLoginProcessFilter;
+import com.only4play.system.infrastructure.security.authorization.JsonAccessDeniedHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -40,6 +41,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
   @Autowired
   private JwtAuthenticationEntryPoint unauthorizedHandler;
+
+  @Autowired
+  private JsonAccessDeniedHandler accessDeniedHandler;
 
   @Autowired
   private JwtAuthenticationProvider jwtAuthenticationProvider;
@@ -105,6 +109,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .csrf().disable()//csrf取消
         .cors().disable()
         .exceptionHandling().authenticationEntryPoint(unauthorizedHandler)
+        .accessDeniedHandler(accessDeniedHandler)
         .and()
         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()//不再存储session
@@ -136,7 +141,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .antMatchers("/public/**").permitAll()
         .antMatchers(commonProperties.getUnAuthUrls()
             .toArray(new String[commonProperties.getUnAuthUrls().size()])).permitAll()
-        .antMatchers("/admin/**").hasRole("ADMIN")
         .anyRequest().authenticated();
 
     httpSecurity

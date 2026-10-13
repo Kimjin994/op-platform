@@ -43,3 +43,4 @@ invoice:
 
 jwt:
   secret: ${JWT_SECRET:3532jwetewtwetwetwe88}
+  expireMinutes: 120

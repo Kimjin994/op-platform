@@ -11,6 +11,7 @@ import com.only4play.system.domain.admin.service.IAdminUserService;
 import com.only4play.system.domain.admin.vo.AdminUserVO;
 import com.only4play.system.infrastructure.config.SecurityProperties;
 import com.only4play.system.infrastructure.constants.AuthConstants;
+import com.only4play.system.infrastructure.security.JwtTokens;
 import com.only4play.system.infrastructure.security.LoginUserType;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
@@ -28,6 +29,8 @@ public class AdminUserContextAware implements UserContextAware {
 
   private final IAdminUserService adminUserService;
 
+  private final AdminPermissionLoader adminPermissionLoader;
+
   @Override
   public BaseJwtUser processToken(String token) {
     boolean pass = JWTUtil.verify(token, securityProperties.getSecret().getBytes(StandardCharsets.UTF_8));
@@ -35,6 +38,7 @@ public class AdminUserContextAware implements UserContextAware {
       throw new CustomAuthenticationException(AuthErrorMsg.tokenIllegal.getCode(),AuthErrorMsg.tokenIllegal.getName());
     }
     JWT jwt = JWTUtil.parseToken(token);
+    JwtTokens.assertNotExpired(jwt);
     Long userId = Long.valueOf(jwt.getPayload().getClaim(AuthConstants.ID).toString());
     LoginUserType type = LoginUserType.of(Integer.valueOf(jwt.getPayload().getClaim(AuthConstants.LOGIN_USER_TYPE).toString())).get();
     if(Objects.equals(LoginUserType.ADMIN_USER,type)){
@@ -42,7 +46,8 @@ public class AdminUserContextAware implements UserContextAware {
       AdminUserVO vo = adminUserService.findById(userId);
       SystemJwtUser systemJwtUser = new SystemJwtUser();
       systemJwtUser.setUsername(vo.getUsername());
-
+      systemJwtUser.setUserId(userId);
+      systemJwtUser.setAuthorities(adminPermissionLoader.load(userId));
       return systemJwtUser;
     }
     return new DummyJwtUser();

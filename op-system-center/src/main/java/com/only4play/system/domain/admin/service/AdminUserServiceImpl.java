@@ -20,6 +20,7 @@ import com.only4play.system.domain.admin.vo.AdminUserPlatformVO;
 import com.only4play.system.domain.admin.vo.AdminUserRoleVO;
 import com.only4play.system.domain.admin.vo.AdminUserVO;
 import com.only4play.system.infrastructure.constants.AuthErrorCode;
+import com.only4play.system.infrastructure.security.authorization.AdminPermissionLoader;
 import com.querydsl.core.BooleanBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +47,8 @@ public class AdminUserServiceImpl implements IAdminUserService {
   private final AdminUserPlatformRepository userPlatformRepository;
 
   private final AdminUserRoleRepository userRoleRepository;
+
+  private final AdminPermissionLoader adminPermissionLoader;
 
   /**
    * createImpl
@@ -150,6 +153,7 @@ public class AdminUserServiceImpl implements IAdminUserService {
       // 将新授权的id保存
       userRoleRepository.saveAll(collect);
     }
+    adminPermissionLoader.evict(userId);
   }
 
   @Override

@@ -9,5 +9,7 @@ import java.util.List;
 public interface AdminUserRoleRepository extends BaseRepository<AdminUserRole, Long> {
   List<AdminUserRole> findAllByUserId(Long userId);
 
+  List<AdminUserRole> findAllByRoleId(Long roleId);
+
   void deleteByUserId(Long userId);
 }

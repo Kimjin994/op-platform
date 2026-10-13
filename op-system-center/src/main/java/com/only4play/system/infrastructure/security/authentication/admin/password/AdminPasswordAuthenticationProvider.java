@@ -1,6 +1,5 @@
 package com.only4play.system.infrastructure.security.authentication.admin.password;
 
-import cn.hutool.jwt.JWTUtil;
 import com.google.common.collect.Maps;
 import com.only4play.security.base.BaseAuthenticationProvider;
 import com.only4play.security.base.LoginSuccessToken;
@@ -9,8 +8,8 @@ import com.only4play.system.domain.admin.AdminUser;
 import com.only4play.system.domain.admin.repository.AdminUserRepository;
 import com.only4play.system.infrastructure.config.SecurityProperties;
 import com.only4play.system.infrastructure.constants.AuthConstants;
+import com.only4play.system.infrastructure.security.JwtTokens;
 import com.only4play.system.infrastructure.security.LoginUserType;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -50,7 +49,8 @@ public class AdminPasswordAuthenticationProvider extends BaseAuthenticationProvi
         Map<String,Object> jwtInfo = Maps.newHashMap();
         jwtInfo.put(AuthConstants.ID, adminUser.get().getId());
         jwtInfo.put(AuthConstants.LOGIN_USER_TYPE, LoginUserType.ADMIN_USER.getCode());
-        String jwtToken = JWTUtil.createToken(jwtInfo, securityProperties.getSecret().getBytes(StandardCharsets.UTF_8));
+        String jwtToken = JwtTokens.sign(jwtInfo, securityProperties.getSecret(),
+            securityProperties.getExpireMinutes());
         return new LoginSuccessToken(jwtToken, adminUser.get().getUsername());
       }else {
         throw new BadCredentialsException(AuthErrorMsg.passwordIncorrect.getName());
